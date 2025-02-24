@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppDispatch } from '@/hooks';
 import { updateAttachments } from '@/store/conversation/sendMessageSlice';
 import { useRefsContext } from '@/context';
-import { AttachFileIcon, CameraIcon, PhotosIcon } from '@/svg-icons';
+import { AttachFileIcon, CameraIcon, MacrosIcon, PhotosIcon } from '@/svg-icons';
 import { tailwind } from '@/theme';
 import { useHaptic, useScaleAnimation } from '@/utils';
 import { Icon } from '@/components-next/common';
@@ -198,6 +198,11 @@ const handleAttachFile = async dispatch => {
 };
 
 const ADD_MENU_OPTIONS = [
+  {
+    icon: <MacrosIcon />,
+    title: 'Macros',
+    handlePress: () => {},
+  },
   {
     icon: <PhotosIcon />,
     title: 'Photos',

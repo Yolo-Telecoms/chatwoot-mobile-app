@@ -1,5 +1,4 @@
 import type { RootState } from '@/store';
-
 import { createSelector } from '@reduxjs/toolkit';
 
 export const selectAssignableAgentsState = (state: RootState) => state.assignableAgents;
