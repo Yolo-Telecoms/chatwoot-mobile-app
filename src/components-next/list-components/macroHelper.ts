@@ -1,4 +1,12 @@
 import { MACRO_ACTION_TYPES as macroActionTypes } from './macroConstants';
+import { Agent, Label, Team } from '@/types';
+
+type File = {
+  id: number;
+  blob_id: number;
+  filename: string;
+};
+
 export const emptyMacro = {
   name: '',
   actions: [
@@ -10,11 +18,12 @@ export const emptyMacro = {
   visibility: 'global',
 };
 
-export const resolveActionName = key => {
-  return macroActionTypes.find(i => i.key === key).label;
+export const resolveActionName = (key: string) => {
+  const action = macroActionTypes.find(i => i.key === key);
+  return action ? action.label : '';
 };
 
-export const resolveTeamIds = (teams, ids) => {
+export const resolveTeamIds = (teams: Team[], ids: number[]) => {
   return ids
     .map(id => {
       const team = teams.find(i => i.id === id);
@@ -23,7 +32,7 @@ export const resolveTeamIds = (teams, ids) => {
     .join(', ');
 };
 
-export const resolveLabels = (labels, ids) => {
+export const resolveLabels = (labels: Label[], ids: string[]) => {
   return ids
     .map(id => {
       const label = labels.find(i => i.title === id);
@@ -32,8 +41,7 @@ export const resolveLabels = (labels, ids) => {
     .join(', ');
 };
 
-export const resolveAgents = (agents, ids) => {
-  console.log('agents', agents);
+export const resolveAgents = (agents: Agent[], ids: number[]) => {
   return ids
     .map(id => {
       const agent = agents.find(i => i.id === id);
@@ -42,7 +50,7 @@ export const resolveAgents = (agents, ids) => {
     .join(', ');
 };
 
-export const getFileName = (id, actionType, files) => {
+export const getFileName = (id: number, actionType: string, files: File[]) => {
   if (!id || !files) return '';
   if (actionType === 'send_attachment') {
     const file = files.find(item => item.blob_id === id);
