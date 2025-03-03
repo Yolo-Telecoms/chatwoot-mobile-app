@@ -16,13 +16,18 @@ import { selectAllLabels } from '@/store/label/labelSelectors';
 import { selectAllTeams } from '@/store/team/teamSelectors';
 import { selectAssignableAgentsByInboxId } from '@/store/assignable-agent/assignableAgentSelectors';
 
-import { resolveActionName, resolveTeamIds, resolveLabels, resolveAgents } from './macroHelper';
+import {
+  resolveActionName,
+  resolveTeamIds,
+  resolveLabels,
+  resolveAgents,
+} from '@/utils/macroUtils';
 import { selectConversationById } from '@/store/conversation/conversationSelectors';
 import { Spinner } from '@/components-next';
 
 type MacroDetailsProps = {
   macro: Macro;
-  conversationId: string;
+  conversationId: number;
   onBack: () => void;
   onClose: () => void;
 };
@@ -106,7 +111,7 @@ const MacroDetails = ({ macro, onBack, onClose, conversationId }: MacroDetailsPr
             ) : (
               <Animated.Text
                 style={tailwind.style(
-                  'text-sm font-inter-580-24 leading-[16px] tracking-[0.24px] pr-1 capitalize text-gray-950',
+                  'text-sm font-inter-580-24 leading-[16px] tracking-[0.24px] pr-1 capitalize text-gray-900',
                 )}>
                 Run
               </Animated.Text>
@@ -123,13 +128,13 @@ const MacroDetails = ({ macro, onBack, onClose, conversationId }: MacroDetailsPr
               {macro.actions && index !== macro.actions.length - 1 && (
                 <View
                   style={tailwind.style(
-                    'absolute top-[14px] bottom-0 left-[6px] w-[1px] bg-gray-200',
+                    'absolute top-[14px] bottom-0 left-[5px] w-[1px] bg-gray-200',
                   )}
                 />
               )}
               <View
                 style={tailwind.style(
-                  'absolute left-0 top-[2px] w-3 h-3 rounded-full bg-white border-2 border-gray-300',
+                  'absolute left-0 top-[2px] w-3 h-3 rounded-full bg-gray-300 border-2 border-gray-300',
                 )}
               />
               <Animated.Text style={tailwind.style('mb-1')}>{action.actionName}</Animated.Text>
@@ -182,7 +187,7 @@ const ListItem = (props: ListItemProps) => {
           )}>
           <Animated.View>
             <Animated.Text
-              style={tailwind.style(' font-inter-420-20 leading-[22px] tracking-[0.16px] ')}>
+              style={tailwind.style('font-inter-420-20 leading-[22px] tracking-[0.16px] ')}>
               {listItem.name}
             </Animated.Text>
           </Animated.View>
@@ -222,7 +227,7 @@ const MacroStack = (props: MacroStackProps) => {
   );
 };
 
-export const MacrosList = ({ conversationId }: { conversationId: string }) => {
+export const MacrosList = ({ conversationId }: { conversationId: number }) => {
   const macros = useAppSelector(selectAllMacros);
   const [selectedMacro, setSelectedMacro] = useState<Macro | null>(null);
 

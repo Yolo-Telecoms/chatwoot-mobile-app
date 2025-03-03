@@ -5,8 +5,8 @@ import {
   resolveTeamIds,
   getFileName,
   resolveAgents,
-} from './macroHelper';
-import { MACRO_ACTION_TYPES } from './macroConstants';
+  MACRO_ACTION_TYPES,
+} from '../macroUtils';
 import { teams, labels, files, agents } from './macroFixtures';
 
 describe('#emptyMacro', () => {
