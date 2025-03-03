@@ -89,16 +89,16 @@ const MacroDetails = ({ macro, onBack, onClose }: MacroDetailsProps) => {
         <Animated.View style={animatedStyle}>
           <Pressable
             style={tailwind.style(
-              'px-3 py-[7px] rounded-lg bg-gray-100 flex flex-row items-center justify-center',
+              'px-3 py-[7px] rounded-lg bg-gray-100 flex flex-row items-center justify-center min-w-[60px] min-h-[32px]',
             )}
             onPress={onPress}
             {...handlers}>
             {isThisMacroExecuting ? (
-              <Spinner size={12} />
+              <Spinner size={16} />
             ) : (
               <Animated.Text
                 style={tailwind.style(
-                  'text-sm font-inter-580-24 leading-[16px] tracking-[0.24px] pr-1 capitalize text-gray-900',
+                  'text-sm font-inter-580-24 leading-[16px] tracking-[0.24px] capitalize text-gray-900',
                 )}>
                 {i18n.t('MACRO.ACTIONS.RUN')}
               </Animated.Text>
