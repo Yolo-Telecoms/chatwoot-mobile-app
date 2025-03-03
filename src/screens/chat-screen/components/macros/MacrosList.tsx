@@ -3,12 +3,13 @@ import { Pressable, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 
-import { BottomSheetBackdrop, Icon } from '../common';
+import { BottomSheetBackdrop, Icon } from '@/components-next';
+import i18n from '@/i18n';
 
 import { useRefsContext } from '@/context';
 import { CaretRight, ChevronLeft, InfoIcon, MacroIcon } from '@/svg-icons';
 import { tailwind } from '@/theme';
-import { Macro } from '@/types';
+import { Agent, Macro } from '@/types';
 import { useHaptic, useScaleAnimation } from '@/utils';
 import { useAppSelector } from '@/hooks';
 import { selectAllMacros } from '@/store/macro/macroSelectors';
@@ -48,15 +49,14 @@ const MacroDetails = ({ macro, onBack, onClose, conversationId }: MacroDetailsPr
   const agents = useAppSelector(state => selectAssignableAgentsByInboxId(state, inboxIds, ''));
   const { handlers, animatedStyle } = useScaleAnimation();
 
-  //   const setShowToast = useToastStore(state => state.setShowToast);
   const [isRunning, setMacroRunning] = useState(false);
 
-  const getActionValue = (key, params) => {
+  const getActionValue = (key: string, params: (string | number)[]) => {
     const actionsMap = {
-      assign_team: resolveTeamIds(teams, params),
-      add_label: resolveLabels(labels, params),
-      remove_label: resolveLabels(labels, params),
-      assign_agent: resolveAgents(agents, params),
+      assign_team: resolveTeamIds(teams, params as number[]),
+      add_label: resolveLabels(labels, params as string[]),
+      remove_label: resolveLabels(labels, params as string[]),
+      assign_agent: resolveAgents(agents as Agent[], params as number[]),
       mute_conversation: null,
       snooze_conversation: null,
       resolve_conversation: null,
@@ -66,7 +66,7 @@ const MacroDetails = ({ macro, onBack, onClose, conversationId }: MacroDetailsPr
       send_email_transcript: params[0],
       add_private_note: params[0],
     };
-    return actionsMap[key] || '';
+    return actionsMap[key as keyof typeof actionsMap] || '';
   };
 
   const resolvedMacro = () => {
@@ -81,13 +81,8 @@ const MacroDetails = ({ macro, onBack, onClose, conversationId }: MacroDetailsPr
     hapticSelection?.();
     setTimeout(() => {
       setMacroRunning(false);
-      //   setShowToast({
-      //     showToast: true,
-      //     toastMessage: 'Macros executed successfully',
-      //   });
       onClose();
     }, 1500);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -113,7 +108,7 @@ const MacroDetails = ({ macro, onBack, onClose, conversationId }: MacroDetailsPr
                 style={tailwind.style(
                   'text-sm font-inter-580-24 leading-[16px] tracking-[0.24px] pr-1 capitalize text-gray-900',
                 )}>
-                Run
+                {i18n.t('MACRO.ACTIONS.RUN')}
               </Animated.Text>
             )}
           </Pressable>
@@ -157,10 +152,8 @@ type ListItemProps = {
   isLastItem: boolean;
 };
 
-const ListItem = (props: ListItemProps) => {
+const MacroListItem = (props: ListItemProps) => {
   const { listItem, index, handleMacroPress, isInsideBottomSheet, isLastItem } = props;
-
-  console.log('listItem', listItem);
 
   const handleOnPress = useCallback(() => {
     handleMacroPress(listItem);
@@ -216,7 +209,7 @@ const MacroStack = (props: MacroStackProps) => {
   return (
     <Animated.View style={tailwind.style(isInsideBottomSheet ? 'py-1' : '')}>
       {macrosList.map((listItem, index) => (
-        <ListItem
+        <MacroListItem
           handleMacroPress={handleMacroPress}
           key={index}
           {...{ index, listItem, isInsideBottomSheet }}
@@ -276,7 +269,7 @@ export const MacrosList = ({ conversationId }: { conversationId: number }) => {
                   style={tailwind.style(
                     'text-gray-700 font-inter-580-24 leading-[17px] tracking-[0.32px]',
                   )}>
-                  Select macro
+                  {i18n.t('MACRO.SELECT_MACRO')}
                 </Animated.Text>
               </View>
               <BottomSheetScrollView

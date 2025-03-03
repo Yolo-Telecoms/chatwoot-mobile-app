@@ -3,4 +3,3 @@ export * from './LanguageList';
 export * from './AttributeList';
 export * from './PriorityIndicator';
 export * from './ChannelIndicator';
-export * from './MacrosList';
