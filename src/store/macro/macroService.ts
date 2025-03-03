@@ -10,4 +10,10 @@ export class MacroService {
       payload: macros,
     };
   }
+
+  static async executeMacro(macroId: number, conversationIds: number[]): Promise<void> {
+    await apiService.post(`macros/${macroId}/execute`, {
+      conversation_ids: conversationIds,
+    });
+  }
 }

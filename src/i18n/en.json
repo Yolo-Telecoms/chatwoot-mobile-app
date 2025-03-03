@@ -450,6 +450,7 @@
     "SELECT_MACRO": "Select macro",
     "ACTIONS": {
       "RUN": "Run"
-    }
+    },
+    "EXECUTION_SUCCESS": "Macro executed successfully"
   }
 }

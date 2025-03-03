@@ -16,4 +16,17 @@ export const macroActions = {
       }
     },
   ),
+
+  executeMacro: createAsyncThunk<void, { macroId: number; conversationIds: number[] }>(
+    'macros/executeMacro',
+    async ({ macroId, conversationIds }, { rejectWithValue }) => {
+      try {
+        await MacroService.executeMacro(macroId, conversationIds);
+      } catch (error) {
+        console.error(error);
+        const message = error instanceof Error ? error.message : '';
+        return rejectWithValue(message);
+      }
+    },
+  ),
 };
