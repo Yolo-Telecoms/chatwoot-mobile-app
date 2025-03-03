@@ -6,6 +6,7 @@ import { Icon, Spinner } from '@/components-next';
 import { CaretRight, InfoIcon, MacroIcon } from '@/svg-icons';
 import { tailwind } from '@/theme';
 import { Macro } from '@/types';
+import { useMacroContext } from './MacroContext';
 
 type MacroItemProps = {
   macro: Macro;
@@ -13,38 +14,34 @@ type MacroItemProps = {
   handleMacroPress: (macro: Macro) => void;
   isInsideBottomSheet: boolean;
   isLastItem: boolean;
-  handleExecuteMacro: (macro: Macro) => void;
 };
 
 const MacroItem = (props: MacroItemProps) => {
-  const { macro, index, handleMacroPress, isInsideBottomSheet, isLastItem, handleExecuteMacro } =
-    props;
-  const [isExecuting, setIsExecuting] = React.useState(false);
+  const { macro, index, handleMacroPress, isInsideBottomSheet, isLastItem } = props;
+  const { executeMacro, executingMacroId } = useMacroContext();
+
+  // Check if this specific macro is executing
+  const isThisMacroExecuting = executingMacroId === macro.id;
 
   const handleOnPress = useCallback(() => {
     handleMacroPress(macro);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const executeMacro = useCallback(() => {
-    setIsExecuting(true);
-    // Simulate execution time
-    setTimeout(() => {
-      setIsExecuting(false);
-      handleExecuteMacro(macro);
-    }, 1000); // Show spinner for 2 seconds
-  }, []);
+  const handleExecute = useCallback(() => {
+    executeMacro(macro);
+  }, [executeMacro, macro]);
 
   return (
     <Pressable
-      onPress={executeMacro}
+      onPress={handleExecute}
       key={index}
       style={({ pressed }) => [
         tailwind.style(index === 0 && !isInsideBottomSheet ? 'rounded-t-[13px]' : ''),
       ]}>
       <Animated.View style={tailwind.style('flex flex-row items-center pl-1')}>
         <Animated.View style={tailwind.style('w-[20px] h-[20px] flex items-center justify-center')}>
-          {isExecuting ? <Spinner size={14} /> : <Icon icon={<MacroIcon />} size={20} />}
+          {isThisMacroExecuting ? <Spinner size={14} /> : <Icon icon={<MacroIcon />} size={20} />}
         </Animated.View>
 
         <Animated.View

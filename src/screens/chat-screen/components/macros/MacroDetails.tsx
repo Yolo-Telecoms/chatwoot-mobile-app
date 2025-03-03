@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
@@ -20,25 +20,22 @@ import {
   resolveAgents,
 } from '@/utils/macroUtils';
 import { selectConversationById } from '@/store/conversation/conversationSelectors';
+import { useMacroContext } from './MacroContext';
 
 type MacroDetailsProps = {
   macro: Macro;
-  conversationId: number;
   onBack: () => void;
   onClose: () => void;
-  handleExecuteMacro: (macro: Macro) => void;
 };
 
-const MacroDetails = ({
-  macro,
-  onBack,
-  onClose,
-  conversationId,
-  handleExecuteMacro,
-}: MacroDetailsProps) => {
+const MacroDetails = ({ macro, onBack, onClose }: MacroDetailsProps) => {
   const hapticSelection = useHaptic();
   const labels = useAppSelector(selectAllLabels);
   const teams = useAppSelector(selectAllTeams);
+  const { executeMacro, executingMacroId, conversationId } = useMacroContext();
+
+  // Check if this specific macro is executing
+  const isThisMacroExecuting = executingMacroId === macro.id;
 
   const selectedConversation = useAppSelector(state =>
     selectConversationById(state, conversationId),
@@ -48,8 +45,6 @@ const MacroDetails = ({
   const inboxIds = inboxId ? [inboxId] : [];
   const agents = useAppSelector(state => selectAssignableAgentsByInboxId(state, inboxIds, ''));
   const { handlers, animatedStyle } = useScaleAnimation();
-
-  const [isRunning, setMacroRunning] = useState(false);
 
   const getActionValue = (key: string, params: (string | number)[]) => {
     const actionsMap = {
@@ -77,13 +72,8 @@ const MacroDetails = ({
   };
 
   const onPress = useCallback(() => {
-    setMacroRunning(true);
     hapticSelection?.();
-    setTimeout(() => {
-      setMacroRunning(false);
-      handleExecuteMacro(macro);
-      onClose();
-    }, 1000);
+    executeMacro(macro);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,7 +93,7 @@ const MacroDetails = ({
             )}
             onPress={onPress}
             {...handlers}>
-            {isRunning ? (
+            {isThisMacroExecuting ? (
               <Spinner size={12} />
             ) : (
               <Animated.Text

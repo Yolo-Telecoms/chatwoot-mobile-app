@@ -9,11 +9,10 @@ type MacroStackProps = {
   macrosList: Macro[];
   isInsideBottomSheet?: boolean;
   handleMacroPress: (macro: Macro) => void;
-  handleExecuteMacro: (macro: Macro) => void;
 };
 
 const MacroStack = (props: MacroStackProps) => {
-  const { macrosList, handleMacroPress, handleExecuteMacro, isInsideBottomSheet = false } = props;
+  const { macrosList, handleMacroPress, isInsideBottomSheet = false } = props;
 
   return (
     <Animated.View style={tailwind.style(isInsideBottomSheet ? 'py-1' : '')}>
@@ -21,7 +20,6 @@ const MacroStack = (props: MacroStackProps) => {
         <MacroItem
           handleMacroPress={handleMacroPress}
           key={index}
-          handleExecuteMacro={handleExecuteMacro}
           {...{ index, macro, isInsideBottomSheet }}
           isLastItem={isInsideBottomSheet ? macrosList.length - 1 === index : false}
         />

@@ -10,12 +10,10 @@ import { tailwind } from '@/theme';
 import { Macro } from '@/types';
 import { useAppSelector } from '@/hooks';
 import { selectAllMacros } from '@/store/macro/macroSelectors';
-import { useAppDispatch } from '@/hooks';
-import { macroActions } from '@/store/macro/macroActions';
-import { showToast } from '@/utils/toastUtils';
 
 import MacroStack from './MacroStack';
 import MacroDetails from './MacroDetails';
+import { MacroProvider } from './MacroContext';
 
 export const MacrosList = ({ conversationId }: { conversationId: number }) => {
   const macros = useAppSelector(selectAllMacros);
@@ -23,17 +21,6 @@ export const MacrosList = ({ conversationId }: { conversationId: number }) => {
 
   const handleMacroPress = (macro: Macro) => {
     setSelectedMacro(macro);
-  };
-
-  const dispatch = useAppDispatch();
-
-  const handleExecuteMacro = (macro: Macro) => {
-    console.log('macro', macro);
-    dispatch(macroActions.executeMacro({ macroId: macro.id, conversationIds: [conversationId] }));
-    showToast({
-      message: i18n.t('MACRO.EXECUTION_SUCCESS'),
-    });
-    onClose();
   };
 
   const handleBack = () => {
@@ -58,38 +45,33 @@ export const MacrosList = ({ conversationId }: { conversationId: number }) => {
         enablePanDownToClose
         snapPoints={['75%']}
         enableDynamicSizing={false}>
-        <Animated.View style={tailwind.style('flex-1')}>
-          {selectedMacro ? (
-            <MacroDetails
-              macro={selectedMacro}
-              onBack={handleBack}
-              onClose={onClose}
-              conversationId={conversationId}
-              handleExecuteMacro={handleExecuteMacro}
-            />
-          ) : (
-            <Animated.View style={tailwind.style('flex-1')}>
-              <View style={tailwind.style('px-4 pt-1 pb-4 items-center')}>
-                <Animated.Text
-                  style={tailwind.style(
-                    'text-gray-700 font-inter-580-24 leading-[17px] tracking-[0.32px]',
-                  )}>
-                  {i18n.t('MACRO.SELECT_MACRO')}
-                </Animated.Text>
-              </View>
-              <BottomSheetScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={tailwind.style('px-3 pb-6')}>
-                <MacroStack
-                  handleMacroPress={handleMacroPress}
-                  macrosList={macros}
-                  isInsideBottomSheet
-                  handleExecuteMacro={handleExecuteMacro}
-                />
-              </BottomSheetScrollView>
-            </Animated.View>
-          )}
-        </Animated.View>
+        <MacroProvider conversationId={conversationId} onClose={onClose}>
+          <Animated.View style={tailwind.style('flex-1')}>
+            {selectedMacro ? (
+              <MacroDetails macro={selectedMacro} onBack={handleBack} onClose={onClose} />
+            ) : (
+              <Animated.View style={tailwind.style('flex-1')}>
+                <View style={tailwind.style('px-4 pt-1 pb-4 items-center')}>
+                  <Animated.Text
+                    style={tailwind.style(
+                      'text-gray-700 font-inter-580-24 leading-[17px] tracking-[0.32px]',
+                    )}>
+                    {i18n.t('MACRO.SELECT_MACRO')}
+                  </Animated.Text>
+                </View>
+                <BottomSheetScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={tailwind.style('px-3 pb-6')}>
+                  <MacroStack
+                    handleMacroPress={handleMacroPress}
+                    macrosList={macros}
+                    isInsideBottomSheet
+                  />
+                </BottomSheetScrollView>
+              </Animated.View>
+            )}
+          </Animated.View>
+        </MacroProvider>
       </BottomSheetModal>
     </Animated.View>
   );
