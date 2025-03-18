@@ -102,9 +102,10 @@ export const ConversationItemDetail = memo((props: ConversationDetailSubCellProp
           </Text>
           <ConversationId id={conversationId} />
         </AnimatedNativeView>
-        <AnimatedNativeView style={tailwind.style('flex flex-row items-center gap-2')}>
+        <AnimatedNativeView style={tailwind.style('flex flex-row items-center gap-1')}>
           {hasPriority ? <PriorityIndicator {...{ priority }} /> : null}
           {inbox && <ChannelIndicator inbox={inbox} additionalAttributes={additionalAttributes} />}
+          <NativeView style={tailwind.style('w-[1px] h-3 bg-slate-500')} />
           <LastActivityTime timestamp={timestamp} />
         </AnimatedNativeView>
       </AnimatedNativeView>
