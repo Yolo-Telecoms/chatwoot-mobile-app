@@ -1,10 +1,12 @@
 import React from 'react';
 import { Alert, Linking, Platform, Pressable, Text } from 'react-native';
-import DocumentPicker, { DocumentPickerResponse } from 'react-native-document-picker';
-import { Asset, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { Asset, launchCamera, launchImageLibrary,  } from 'react-native-image-picker';
 import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { pick, types, DocumentPickerResponse } from '@react-native-documents/picker';
+
 import { useAppDispatch } from '@/hooks';
 import { updateAttachments } from '@/store/conversation/sendMessageSlice';
 import { useRefsContext } from '@/context';
@@ -17,6 +19,7 @@ import i18n from '@/i18n';
 import { showToast } from '@/helpers/ToastHelper';
 import { findFileSize } from '@/helpers/FileHelper';
 
+/** Allows picking from the device's photo library */
 interface HandleOpenPhotosLibrary {
   (dispatch: (arg: any) => void): Promise<void>;
 }
@@ -32,16 +35,10 @@ export const handleOpenPhotosLibrary: HandleOpenPhotosLibrary = async dispatch =
           'Permission Denied',
           'The permission to access the photo library has been denied and cannot be requested again. Please enable it in your device settings if you wish to access photos from your library.',
           [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
+            { text: 'Cancel', style: 'cancel' },
             {
               text: 'Open Settings',
-              onPress: () => {
-                // Open app settings
-                Linking.openSettings();
-              },
+              onPress: () => Linking.openSettings(),
             },
           ],
           { cancelable: false },
@@ -55,9 +52,11 @@ export const handleOpenPhotosLibrary: HandleOpenPhotosLibrary = async dispatch =
           presentationStyle: 'formSheet',
         });
         if (pickedAssets.didCancel) {
+          // User canceled
         } else if (pickedAssets.errorCode) {
+          // Handle error
         } else {
-          if (pickedAssets.assets && pickedAssets.assets?.length > 0) {
+          if (pickedAssets.assets && pickedAssets.assets.length > 0) {
             validateFileAndSetAttachments(dispatch, pickedAssets.assets[0]);
           }
         }
@@ -70,16 +69,10 @@ export const handleOpenPhotosLibrary: HandleOpenPhotosLibrary = async dispatch =
           'Permission Denied',
           'The permission to access the photo library has been denied and cannot be requested again. Please enable it in your device settings if you wish to access photos from your library.',
           [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
+            { text: 'Cancel', style: 'cancel' },
             {
               text: 'Open Settings',
-              onPress: () => {
-                // Open app settings
-                Linking.openSettings();
-              },
+              onPress: () => Linking.openSettings(),
             },
           ],
           { cancelable: false },
@@ -93,9 +86,11 @@ export const handleOpenPhotosLibrary: HandleOpenPhotosLibrary = async dispatch =
           presentationStyle: 'formSheet',
         });
         if (pickedAssets.didCancel) {
+          // User canceled
         } else if (pickedAssets.errorCode) {
+          // Handle error
         } else {
-          if (pickedAssets.assets && pickedAssets.assets?.length > 0) {
+          if (pickedAssets.assets && pickedAssets.assets.length > 0) {
             validateFileAndSetAttachments(dispatch, pickedAssets.assets[0]);
           }
         }
@@ -104,10 +99,10 @@ export const handleOpenPhotosLibrary: HandleOpenPhotosLibrary = async dispatch =
   }
 };
 
+/** Allows capturing from camera */
 interface HandleLaunchCamera {
   (dispatch: (arg: any) => void): Promise<void>;
 }
-
 const handleLaunchCamera: HandleLaunchCamera = async dispatch => {
   request(Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA).then(
     async result => {
@@ -116,16 +111,10 @@ const handleLaunchCamera: HandleLaunchCamera = async dispatch => {
           'Permission Denied',
           'The permission to access the camera has been denied and cannot be requested again. Please enable it in your device settings if you wish to use the camera feature.',
           [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
+            { text: 'Cancel', style: 'cancel' },
             {
               text: 'Open Settings',
-              onPress: () => {
-                // Open app settings
-                Linking.openSettings();
-              },
+              onPress: () => Linking.openSettings(),
             },
           ],
           { cancelable: false },
@@ -137,9 +126,11 @@ const handleLaunchCamera: HandleLaunchCamera = async dispatch => {
           mediaType: 'mixed',
         });
         if (imageResult.didCancel) {
+          // User canceled
         } else if (imageResult.errorCode) {
+          // Handle error
         } else {
-          if (imageResult.assets && imageResult.assets?.length > 0) {
+          if (imageResult.assets && imageResult.assets.length > 0) {
             validateFileAndSetAttachments(dispatch, imageResult.assets[0]);
           }
         }
@@ -149,58 +140,76 @@ const handleLaunchCamera: HandleLaunchCamera = async dispatch => {
 };
 
 /**
- * Doing this so that the our Store Object Attachments is of single type - Asset from Image Picker Library
- * The function `mapObject` takes an object of type `DocumentPickerResponse` and returns an array of
- * `Asset` objects with properties `fileName`, `fileSize`, `type`, and `uri`.
- * @param {DocumentPickerResponse} originalObject - The originalObject parameter is of type
- * DocumentPickerResponse.
- * @returns The function `mapObject` is returning an array of `Asset` objects.
+ * Utility that maps a DocumentPickerResponse to the "Asset" shape used by our store.
  */
 const mapObject = (originalObject: DocumentPickerResponse): Asset[] => {
   return [
     {
-      fileName: originalObject.name || '',
-      fileSize: originalObject.size || 0,
-      type: originalObject.type || '',
-      uri: originalObject.uri || '',
+      fileName: originalObject.name ?? '',
+      fileSize: originalObject.size ?? 0,
+      type: originalObject.type ?? '',
+      uri: originalObject.uri ?? '',
     },
   ];
 };
 
+/** Allows picking files from the device, using the new library. */
 interface HandleAttachFile {
   (dispatch: (arg: any) => void): Promise<void>;
 }
-
 const handleAttachFile: HandleAttachFile = async dispatch => {
   try {
-    const result: DocumentPickerResponse[] = await DocumentPicker.pick({
-      type: [
-        DocumentPicker.types.allFiles,
-        DocumentPicker.types.images,
-        DocumentPicker.types.plainText,
-        DocumentPicker.types.audio,
-        DocumentPicker.types.pdf,
-        DocumentPicker.types.zip,
-        DocumentPicker.types.csv,
-        DocumentPicker.types.doc,
-        DocumentPicker.types.docx,
-        DocumentPicker.types.ppt,
-        DocumentPicker.types.pptx,
-        DocumentPicker.types.xls,
-        DocumentPicker.types.xlsx,
-      ], // You can specify the file types you want to allow
-      presentationStyle: 'formSheet',
+    // 2. Replacing `DocumentPicker.pick(...)` with the new `pick(...)`
+    //    and using `types.*` in place of `DocumentPicker.types.*`.
+    const results = await pick({
+      types: [
+        types.allFiles,
+        types.images,
+        types.plainText,
+        types.audio,
+        types.pdf,
+        types.zip,
+        types.csv,
+        types.doc,
+        types.docx,
+        types.ppt,
+        types.pptx,
+        types.xls,
+        types.xlsx,
+      ],
+      presentationStyle: 'formSheet', // optional
     });
-    validateFileAndSetAttachments(dispatch, mapObject(result[0])[0]);
-  } catch (err: any) {
-    if (DocumentPicker.isCancel(err)) {
-      // User cancelled the picker
+
+    if (results.length === 0) {
+      // No file selected
+      return;
+    }
+
+    // If at least one file was picked, map it to an Asset and validate
+    const pickedAsset = mapObject(results[0])[0];
+    validateFileAndSetAttachments(dispatch, pickedAsset);
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.toLowerCase().includes('cancel')) {
+      // User canceled the picker
     } else {
       throw err;
     }
   }
 };
 
+/** Validate file size, then dispatch */
+export const validateFileAndSetAttachments = async (
+  dispatch: (arg: any) => void,
+  attachment: Asset,
+) => {
+  if (findFileSize(attachment.fileSize) <= MAXIMUM_FILE_UPLOAD_SIZE) {
+    dispatch(updateAttachments([attachment]));
+  } else {
+    showToast({ message: i18n.t('CONVERSATION.FILE_SIZE_LIMIT') });
+  }
+};
+
+/** Menu data */
 const ADD_MENU_OPTIONS = [
   {
     icon: <PhotosIcon />,
@@ -219,15 +228,7 @@ const ADD_MENU_OPTIONS = [
   },
 ];
 
-export const validateFileAndSetAttachments = async (dispatch: (arg: any) => void, attachment: Asset) => {
-  const { fileSize } = attachment;
-  if (findFileSize(fileSize) <= MAXIMUM_FILE_UPLOAD_SIZE) {
-    dispatch(updateAttachments([attachment]));
-  } else {
-    showToast({ message: i18n.t('CONVERSATION.FILE_SIZE_LIMIT') });
-  }
-};
-
+/** Type for each menu item */
 type MenuOptionProps = {
   index: number;
   menuOption: (typeof ADD_MENU_OPTIONS)[0];
@@ -237,13 +238,13 @@ const MenuOption = (props: MenuOptionProps) => {
   const { index, menuOption } = props;
   const dispatch = useAppDispatch();
   const { macrosListSheetRef } = useRefsContext();
-
   const { animatedStyle, handlers } = useScaleAnimation();
   const hapticSelection = useHaptic();
 
   const handlePress = () => {
     hapticSelection?.();
-    menuOption?.handlePress(dispatch);
+    menuOption.handlePress(dispatch);
+
     if (menuOption.title === 'Macros') {
       macrosListSheetRef.current?.present();
     }
@@ -252,7 +253,7 @@ const MenuOption = (props: MenuOptionProps) => {
   return (
     <Animated.View style={[tailwind.style('mb-3'), animatedStyle]}>
       <Pressable onPress={handlePress} {...handlers}>
-        <Animated.View key={index} style={[tailwind.style('flex-row items-center justify-start')]}>
+        <Animated.View key={index} style={tailwind.style('flex-row items-center justify-start')}>
           <Animated.View style={tailwind.style('p-2')}>
             <Icon icon={menuOption.icon} size={24} />
           </Animated.View>
@@ -271,17 +272,20 @@ const MenuOption = (props: MenuOptionProps) => {
 export const CommandOptionsMenu = () => {
   const { bottom } = useSafeAreaInsets();
   const isAndroid = Platform.OS === 'android';
+
+  // Adjust container height based on device inset
   const containerHeight = isAndroid
     ? 150 + (bottom === 0 ? 16 : bottom)
     : 110 + (bottom === 0 ? 16 : bottom);
+
   return (
     <Animated.View
       entering={SlideInDown.springify().damping(38).stiffness(240)}
       exiting={SlideOutDown.springify().damping(38).stiffness(240)}
       style={tailwind.style('mx-1 pt-2 items-start', `h-[${containerHeight}px]`)}>
-      {ADD_MENU_OPTIONS.map((menuOption, index) => {
-        return <MenuOption key={menuOption.title} {...{ menuOption, index }} />;
-      })}
+      {ADD_MENU_OPTIONS.map((menuOption, index) => (
+        <MenuOption key={menuOption.title} {...{ menuOption, index }} />
+      ))}
     </Animated.View>
   );
 };
