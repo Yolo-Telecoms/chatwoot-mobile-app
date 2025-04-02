@@ -17,7 +17,10 @@ import i18n from '@/i18n';
 import { showToast } from '@/helpers/ToastHelper';
 import { findFileSize } from '@/helpers/FileHelper';
 
-export const handleOpenPhotosLibrary = async dispatch => {
+interface HandleOpenPhotosLibrary {
+  (dispatch: (arg: any) => void): Promise<void>;
+}
+export const handleOpenPhotosLibrary: HandleOpenPhotosLibrary = async dispatch => {
   if (Platform.OS === 'ios') {
     request(
       Platform.OS === 'ios'
@@ -101,7 +104,11 @@ export const handleOpenPhotosLibrary = async dispatch => {
   }
 };
 
-const handleLaunchCamera = async dispatch => {
+interface HandleLaunchCamera {
+  (dispatch: (arg: any) => void): Promise<void>;
+}
+
+const handleLaunchCamera: HandleLaunchCamera = async dispatch => {
   request(Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA).then(
     async result => {
       if (RESULTS.BLOCKED === result) {
@@ -160,9 +167,13 @@ const mapObject = (originalObject: DocumentPickerResponse): Asset[] => {
   ];
 };
 
-const handleAttachFile = async dispatch => {
+interface HandleAttachFile {
+  (dispatch: (arg: any) => void): Promise<void>;
+}
+
+const handleAttachFile: HandleAttachFile = async dispatch => {
   try {
-    const result = await DocumentPicker.pick({
+    const result: DocumentPickerResponse[] = await DocumentPicker.pick({
       type: [
         DocumentPicker.types.allFiles,
         DocumentPicker.types.images,
@@ -180,8 +191,8 @@ const handleAttachFile = async dispatch => {
       ], // You can specify the file types you want to allow
       presentationStyle: 'formSheet',
     });
-    validateFileAndSetAttachments(dispatch, mapObject(result[0]));
-  } catch (err) {
+    validateFileAndSetAttachments(dispatch, mapObject(result[0])[0]);
+  } catch (err: any) {
     if (DocumentPicker.isCancel(err)) {
       // User cancelled the picker
     } else {
@@ -208,7 +219,7 @@ const ADD_MENU_OPTIONS = [
   },
 ];
 
-export const validateFileAndSetAttachments = async (dispatch, attachment) => {
+export const validateFileAndSetAttachments = async (dispatch: (arg: any) => void, attachment: Asset) => {
   const { fileSize } = attachment;
   if (findFileSize(fileSize) <= MAXIMUM_FILE_UPLOAD_SIZE) {
     dispatch(updateAttachments([attachment]));
