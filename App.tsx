@@ -1,9 +1,10 @@
+// File: App.tsx
 import * as Sentry from '@sentry/react-native';
 
-import Constants from 'expo-constants';
+import expoConstants from 'expo-constants';
 import App from './src/app';
 
-const isStorybookEnabled = Constants.expoConfig?.extra?.eas?.storybookEnabled;
+const isStorybookEnabled = expoConstants.expoConfig?.extra?.eas?.storybookEnabled;
 
 if (!__DEV__) {
   Sentry.init({
@@ -14,7 +15,7 @@ if (!__DEV__) {
 }
 
 if (__DEV__) {
-  require('./ReactotronConfig');
+  void import('./ReactotronConfig');
 }
 // Ref: https://dev.to/dannyhw/how-to-swap-between-react-native-storybook-and-your-app-p3o
 export default (() => {
