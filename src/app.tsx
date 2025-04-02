@@ -2,21 +2,21 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { Alert, BackHandler, LogBox } from 'react-native';
 import { PersistGate } from 'redux-persist/integration/react';
+
 import { store, persistor } from './store';
 import { AppNavigator } from '@/navigation';
 
 import i18n from '@/i18n';
 
-// TODO: Please fix this
+// Suppress require-cycle logs
 LogBox.ignoreLogs(['Require cycle:']);
 
 const Chatwoot = () => {
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
-    };
+    return () => BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
   }, []);
+
   const handleBackButtonClick = () => {
     Alert.alert(
       i18n.t('EXIT.TITLE'),
@@ -27,7 +27,10 @@ const Chatwoot = () => {
           onPress: () => {},
           style: 'cancel',
         },
-        { text: i18n.t('EXIT.OK'), onPress: () => BackHandler.exitApp() },
+        {
+          text: i18n.t('EXIT.OK'),
+          onPress: () => BackHandler.exitApp(),
+        },
       ],
       { cancelable: false },
     );
