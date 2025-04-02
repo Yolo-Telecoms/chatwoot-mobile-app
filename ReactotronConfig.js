@@ -1,9 +1,12 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import Reactotron from 'reactotron-react-native';
-// Don't remove this import, this is used by reactotron-redux only in dev mode
 import { reactotronRedux } from 'reactotron-redux';
 
-const reactotron = Reactotron.useReactNative() // add all built-in react native plugins
+// Disable the rule just for this next call:
+const reactotron = Reactotron
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  .useReactNative()
   .use(reactotronRedux())
-  .connect(); //Don't forget about me!
+  .connect();
 
 export default reactotron;
