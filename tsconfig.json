@@ -1,25 +1,16 @@
 {
-  // Remove "extends" if you are not using Expo
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    // Target modern JavaScript features
     "target": "ESNext",
-    // Tells TypeScript which libraries to include in the compilation
-    // For React Native, you usually have "dom" and "dom.iterable" to get all definitions used by RN
+    "module": "esnext",
     "lib": ["ESNext", "dom", "dom.iterable"],
-    // Let TS know we’ll use React Native’s JSX transform
     "jsx": "react-native",
-    // Module resolution settings
     "moduleResolution": "node",
-    // Add whatever strictness flags you need
     "strict": true,
     "skipLibCheck": true,
-    // If you want type checking only (no .js output)
     "noEmit": true,
-    // For allowing default imports from modules with no default
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    // Enable baseUrl + paths if you want `@/*` -> `src/*`
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -27,6 +18,7 @@
   },
   "include": [
     "src",
+    "types",
     "**/*.ts",
     "**/*.tsx"
   ],
