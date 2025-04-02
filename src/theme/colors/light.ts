@@ -1,4 +1,4 @@
-module.exports = {
+const colors = {
   gray: {
     50: 'hsl(0, 0%, 97.5%)',
     100: 'hsl(0, 0%, 94.6%)',
@@ -867,3 +867,5 @@ module.exports = {
     950: 'hsla(16, 99.4%, 13.1%, 0.887)',
   },
 };
+
+export default colors;

@@ -14,3 +14,5 @@ module.exports = {
     A12: 'hsla(0, 0%, 100%, 0.926)',
   },
 };
+
+export {};

@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const defaultTheme = require('tailwindcss/defaultTheme');
+// src/theme/tailwind.config.ts
 
-const radixUILightColors = require('./colors/light');
-const radixUIDarkColors = require('./colors/dark');
-
-const blackA = require('./colors/blackA');
-const whiteA = require('./colors/whiteA');
+import * as defaultTheme from 'tailwindcss/defaultTheme';
+import * as radixUILightColors from './colors/light';
+import * as radixUIDarkColors from './colors/dark';
+import * as blackA from './colors/blackA';
+import * as whiteA from './colors/whiteA';
 
 const chatwootAppColors = {
   ...blackA,
@@ -15,10 +14,13 @@ const chatwootAppColors = {
 };
 
 export const twConfig = {
+  // Merge defaultTheme into your config
   theme: {
     ...defaultTheme,
     extend: {
-      colors: { ...chatwootAppColors },
+      colors: {
+        ...chatwootAppColors,
+      },
       fontSize: {
         xs: '12px',
         cxs: '13px',
