@@ -16,7 +16,7 @@ export const getHeaders = async () => {
       client,
       accountId,
     };
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };
@@ -26,7 +26,7 @@ export const getBaseUrl = async () => {
     const state = await getStore().getState();
     const { installationUrl } = state.settings;
     return installationUrl;
-  } catch (error) {}
+  } catch (_error) {}
 };
 
 export const getPubSubToken = async () => {
@@ -37,7 +37,7 @@ export const getPubSubToken = async () => {
     } = state.auth;
 
     return pubSubToken;
-  } catch (error) {}
+  } catch (_error) {}
 };
 
 export const getUserDetails = async () => {
@@ -47,5 +47,5 @@ export const getUserDetails = async () => {
       user: { id: userId, account_id: accountId, name, email },
     } = state.auth;
     return { accountId, userId, name, email };
-  } catch (error) {}
+  } catch (_error) {}
 };
