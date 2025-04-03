@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
   Easing,
@@ -27,7 +27,7 @@ interface AnimatedDotProps {
 
 const AnimatedDot: React.FC<AnimatedDotProps> = ({ size, delay }) => {
   const dotAnimation = useSharedValue(0);
-  React.useEffect(() => {
+  useEffect(() => {
     dotAnimation.value = withDelay(
       delay,
       withRepeat(
