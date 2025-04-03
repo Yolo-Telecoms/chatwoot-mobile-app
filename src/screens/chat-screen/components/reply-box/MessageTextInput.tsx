@@ -135,10 +135,13 @@ export const MessageTextInput = ({
     return () => typingIndicator.stop();
   }, [typingIndicator]);
 
-  const onChangeText = (text: string) => {
-    startTyping();
-    dispatch(setMessageContent(text));
-  };
+  const onChangeText = useCallback(
+    (text: string) => {
+      startTyping();
+      dispatch(setMessageContent(text));
+    },
+    [startTyping, dispatch],
+  );
 
   const handleOnFocus = useCallback(
     (_args: NativeSyntheticEvent<TextInputFocusEventData>) => {
@@ -151,12 +154,13 @@ export const MessageTextInput = ({
 
   useEffect(() => {
     if (selectedCannedResponse) onChangeText(selectedCannedResponse);
-  }, [selectedCannedResponse]);
+  }, [onChangeText, selectedCannedResponse]);
 
   useEffect(() => {
     if (quoteMessage !== null) {
       // Focussing Text Input when you have decided to reply
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       textInputRef?.current?.focus();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,6 +227,7 @@ export const MessageTextInput = ({
         layout={LinearTransition.springify().damping(20).stiffness(120)}
         style={[tailwind.style('flex-1 my-0.5')]}>
         <MentionInput
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           ref={textInputRef}
           layout={LinearTransition.springify().damping(20).stiffness(120)}

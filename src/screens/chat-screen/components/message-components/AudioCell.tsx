@@ -16,6 +16,7 @@ import { Channel, IconProps, Message, MessageStatus, UnixTimestamp } from '@/typ
 import { unixTimestampToReadableTime } from '@/utils';
 import { Avatar, Icon, Slider } from '@/components-next/common';
 import { Spinner } from '@/components-next/spinner';
+
 import {
   AudioStatus,
   pausePlayer,
@@ -30,6 +31,7 @@ import { DeliveryStatus } from './DeliveryStatus';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/hooks';
 
+// Simple play/pause icons
 export const PlayIcon = ({ fill, fillOpacity }: IconProps) => (
   <Svg width="10" height="13" viewBox="0 0 10 13" fill="none">
     <Path d="M0 13V0L10 6.80952L0 13Z" fill={fill} fillOpacity={fillOpacity} />
@@ -70,11 +72,18 @@ export const AudioPlayer = ({ audioSrc, isIncoming, isOutgoing }: AudioPlayerPro
   const dispatch = useDispatch();
   const currentPlayingAudioSrc = useAppSelector(selectCurrentPlayingAudioSrc);
 
+  // Reanimated shared values for current position & total duration
   const currentPosition = useSharedValue(0);
   const totalDuration = useSharedValue(0);
 
+  /**
+   * The callback shape matches what `startPlayer` actually sends:
+   * { status: AudioStatus; data?: PlayBackType }
+   */
   const audioPlayBackStatus = (event: { status: AudioStatus; data?: PlayBackType }) => {
+    // If data is undefined, just ignore
     if (!event.data) return;
+
     currentPosition.value = event.data.currentPosition;
     totalDuration.value = event.data.duration;
 
@@ -87,8 +96,8 @@ export const AudioPlayer = ({ audioSrc, isIncoming, isOutgoing }: AudioPlayerPro
   };
 
   const togglePlayback = () => {
-    // If the same audio is currently playing
     if (audioSrc === currentPlayingAudioSrc) {
+      // Same audio is playing, just toggle
       if (isAudioPlaying) {
         pausePlayer();
       } else {
@@ -96,7 +105,7 @@ export const AudioPlayer = ({ audioSrc, isIncoming, isOutgoing }: AudioPlayerPro
       }
       setAudioPlaying(!isAudioPlaying);
     } else {
-      // If a different audio is playing
+      // Different audio: start a new one
       setIsSoundLoading(true);
       startPlayer(audioSrc, audioPlayBackStatus).then(() => {
         setIsSoundLoading(false);
@@ -116,13 +125,14 @@ export const AudioPlayer = ({ audioSrc, isIncoming, isOutgoing }: AudioPlayerPro
     await pausePlayer();
   };
 
+  // Check if the current audio is playing
   const isCurrentAudioSrcPlaying = useMemo(
     () => currentPlayingAudioSrc === audioSrc && isAudioPlaying,
     [audioSrc, currentPlayingAudioSrc, isAudioPlaying],
   );
 
+  // If a different audio is playing, reset local position
   useEffect(() => {
-    // If a different audio source is playing, reset our local position
     if (currentPlayingAudioSrc !== audioSrc) {
       currentPosition.value = 0;
       totalDuration.value = 0;
@@ -130,8 +140,8 @@ export const AudioPlayer = ({ audioSrc, isIncoming, isOutgoing }: AudioPlayerPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPlayingAudioSrc]);
 
+  // Cleanup on unmount
   useEffect(() => {
-    // Cleanup on unmount: stop the player
     return () => {
       stopPlayer()
         .then(() => null)
@@ -217,7 +227,7 @@ export const AudioCell: React.FC<AudioCellProps> = props => {
           <Animated.View style={tailwind`flex items-end justify-end mr-1`}>
             <Avatar
               size="md"
-              // Convert `null` → `undefined` in case thumbnail is null
+              // Convert null => undefined for 'uri'
               src={sender?.thumbnail ? { uri: sender.thumbnail ?? undefined } : undefined}
               name={sender?.name || ''}
             />
@@ -268,7 +278,6 @@ export const AudioCell: React.FC<AudioCellProps> = props => {
           <Animated.View style={tailwind`flex items-end justify-end ml-1`}>
             <Avatar
               size="md"
-              // Convert `null` → `undefined`
               src={sender?.thumbnail ? { uri: sender.thumbnail ?? undefined } : undefined}
               name={sender?.name || ''}
             />

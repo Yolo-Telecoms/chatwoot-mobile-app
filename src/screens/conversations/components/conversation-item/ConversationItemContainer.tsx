@@ -34,7 +34,7 @@ type ConversationItemContainerProps = {
   openedRowIndex: SharedValue<number | null>;
 };
 
-const ReadComponent = React.memo(() => {
+const ReadComponent = memo(() => {
   return (
     <Animated.View style={tailwind.style('flex justify-center items-center')}>
       <Icon icon={<MarkAsRead />} size={24} />
@@ -42,7 +42,7 @@ const ReadComponent = React.memo(() => {
   );
 });
 
-const UnreadComponent = React.memo(() => {
+const UnreadComponent = memo(() => {
   return (
     <Animated.View style={tailwind.style('flex justify-center items-center')}>
       <Icon icon={<MarkAsUnRead />} size={24} />
@@ -50,7 +50,7 @@ const UnreadComponent = React.memo(() => {
   );
 });
 
-const StatusComponent = React.memo(() => {
+const StatusComponent = memo(() => {
   return (
     <Animated.View style={tailwind.style('flex justify-center items-center ')}>
       <Icon icon={<StatusIcon />} size={24} />

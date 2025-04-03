@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet } from 'react-native';
 import FileViewer from 'react-native-file-viewer';
 import Animated from 'react-native-reanimated';
-import RNFetchBlob from 'rn-fetch-blob';
+import { RNFetchBlob } from 'rn-fetch-blob';
 
 import { FileIcon } from '@/svg-icons';
 import { tailwind } from '@/theme';

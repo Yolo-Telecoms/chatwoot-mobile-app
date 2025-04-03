@@ -1,4 +1,6 @@
-import React, { forwardRef, PropsWithChildren, useCallback, useRef } from 'react';
+// File: src/screens/chat-screen/components/message-menu/MessageMenu.tsx
+
+import React, { PropsWithChildren, useCallback, useRef } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { interpolate, runOnJS, useAnimatedStyle } from 'react-native-reanimated';
@@ -24,6 +26,32 @@ type MessageMenuProps = {
   menuOptions: MenuOption[];
 };
 
+// 1) Instead of forwardRef, define a normal functional component for the backdrop
+type CustomBackdropProps = BottomSheetBackdropProps & {
+  sheetRef: React.RefObject<BottomSheetModal>;
+};
+
+/**
+ * The custom backdrop that dims the screen. We pass `sheetRef` as a normal prop.
+ */
+function ContextMenuBottomSheetBackdrop({ animatedIndex, style, sheetRef }: CustomBackdropProps) {
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(animatedIndex.value, [-1, 0], [0, 1]),
+  }));
+
+  const handleBackdropPress = () => {
+    // We can safely call dismiss on the bottom sheet
+    sheetRef.current?.dismiss({ overshootClamping: true });
+  };
+
+  return (
+    <Pressable onPress={handleBackdropPress} style={style}>
+      <Animated.View style={[tailwind`bg-blackA-A9`, style, animatedStyle]} />
+    </Pressable>
+  );
+}
+
+// 2) Our context menu triggers for iOS
 const ContextMenuTrigger = ContextMenu.create<React.ComponentProps<typeof ContextMenu.Trigger>>(
   props => (
     <ContextMenu.Trigger {...props} asChild>
@@ -44,41 +72,16 @@ const ContextMenuItem = ContextMenu.create<React.ComponentProps<typeof ContextMe
   'Item',
 );
 
-// eslint-disable-next-line react/display-name
-const ContextMenuBottomSheetBackdrop = forwardRef<
-  React.RefObject<BottomSheetModal>,
-  BottomSheetBackdropProps
->((props, ref) => {
-  const { animatedIndex, style } = props;
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(animatedIndex.value, [-1, 0], [0, 1]),
-    };
-  });
-
-  const handleBackdropPress = () => {
-    // @ts-ignore
-    ref?.current?.dismiss({ overshootClamping: true });
-  };
-
-  return (
-    <Pressable onPress={handleBackdropPress} style={style}>
-      <Animated.View style={[tailwind.style('bg-blackA-A9'), style, animatedStyle]} />
-    </Pressable>
-  );
-});
-
-export const MessageMenu = (props: PropsWithChildren<MessageMenuProps>) => {
+// 3) The main component
+export function MessageMenu(props: PropsWithChildren<MessageMenuProps>) {
   const { children, menuOptions } = props;
 
+  // The bottom sheet ref
   const contextMenuSheetRef = useRef<BottomSheetModal>(null);
+
   const openSheet = () => {
     contextMenuSheetRef.current?.present();
   };
-  const longPressGesture = Gesture.LongPress()
-    .minDuration(500)
-    .onStart(() => runOnJS(openSheet)());
 
   const { bottom } = useSafeAreaInsets();
 
@@ -88,31 +91,34 @@ export const MessageMenu = (props: PropsWithChildren<MessageMenuProps>) => {
     damping: 30,
   });
 
+  // We don't do anything special on dismiss
   const handleOnDismiss = () => {};
 
-  const renderBackDrop = useCallback(
+  // Pass the custom prop 'sheetRef' to our backdrop
+  const renderBackdrop = useCallback(
     (backdropProps: BottomSheetBackdropProps) => (
-      <ContextMenuBottomSheetBackdrop
-        {...backdropProps}
-        // @ts-ignore
-        ref={contextMenuSheetRef}
-      />
+      <ContextMenuBottomSheetBackdrop {...backdropProps} sheetRef={contextMenuSheetRef} />
     ),
     [],
   );
 
+  // Define a long press gesture for Android
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(500)
+    .onStart(() => {
+      runOnJS(openSheet)();
+    });
+
   if (Platform.OS === 'android') {
     return (
-      <React.Fragment>
+      <>
         <GestureDetector gesture={longPressGesture}>{children}</GestureDetector>
         <BottomSheetModal
           ref={contextMenuSheetRef}
-          backdropComponent={renderBackDrop}
-          handleIndicatorStyle={tailwind.style(
-            'overflow-hidden bg-blackA-A6 w-8 h-1 rounded-[11px]',
-          )}
-          handleStyle={tailwind.style('p-0 h-4 pt-[5px]')}
-          style={tailwind.style('mx-3 rounded-[26px] overflow-hidden')}
+          backdropComponent={renderBackdrop}
+          handleIndicatorStyle={tailwind`overflow-hidden bg-blackA-A6 w-8 h-1 rounded-[11px]`}
+          handleStyle={tailwind`p-0 h-4 pt-[5px]`}
+          style={tailwind`mx-3 rounded-[26px] overflow-hidden`}
           detached
           bottomInset={bottom === 0 ? 12 : bottom}
           animationConfigs={animationConfigs}
@@ -121,12 +127,13 @@ export const MessageMenu = (props: PropsWithChildren<MessageMenuProps>) => {
           onDismiss={handleOnDismiss}>
           <BottomSheetWrapper>
             <BottomSheetHeader headerText="Select action" />
-            <Animated.View style={tailwind.style('py-1 pl-3')}>
-              {menuOptions?.map((option, index) => {
+            <Animated.View style={tailwind`py-1 pl-3`}>
+              {menuOptions.map((option, index) => {
                 return (
                   <Pressable
                     key={option.title + index}
-                    style={tailwind.style('flex flex-row items-center')}>
+                    style={tailwind`flex flex-row items-center`}
+                    onPress={option.handleOnPressMenuOption}>
                     <Animated.View>
                       <Icon icon={option.icon} size={24} />
                     </Animated.View>
@@ -136,9 +143,7 @@ export const MessageMenu = (props: PropsWithChildren<MessageMenuProps>) => {
                         index !== menuOptions.length - 1 ? 'border-b-[1px] border-blackA-A3' : '',
                       )}>
                       <Animated.Text
-                        style={tailwind.style(
-                          'text-base text-gray-950 font-inter-420-20 leading-[21px] tracking-[0.16px] capitalize',
-                        )}>
+                        style={tailwind`text-base text-gray-950 font-inter-420-20 leading-[21px] tracking-[0.16px] capitalize`}>
                         {option.title}
                       </Animated.Text>
                     </Animated.View>
@@ -148,28 +153,27 @@ export const MessageMenu = (props: PropsWithChildren<MessageMenuProps>) => {
             </Animated.View>
           </BottomSheetWrapper>
         </BottomSheetModal>
-      </React.Fragment>
+      </>
     );
   }
 
-  return menuOptions?.length > 0 ? (
+  // For iOS, we use zeego context menu
+  return menuOptions.length > 0 ? (
     <ContextMenu.Root>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenu.Content>
-        {menuOptions?.map(option => {
-          return (
-            <ContextMenuItem
-              key={option.title}
-              onSelect={option.handleOnPressMenuOption}
-              destructive={option.destructive}>
-              {option.icon}
-              <ContextMenu.ItemTitle>{option.title}</ContextMenu.ItemTitle>
-            </ContextMenuItem>
-          );
-        })}
+        {menuOptions.map(option => (
+          <ContextMenuItem
+            key={option.title}
+            onSelect={option.handleOnPressMenuOption}
+            destructive={option.destructive}>
+            {option.icon}
+            <ContextMenu.ItemTitle>{option.title}</ContextMenu.ItemTitle>
+          </ContextMenuItem>
+        ))}
       </ContextMenu.Content>
     </ContextMenu.Root>
   ) : (
-    <React.Fragment>{children}</React.Fragment>
+    <>{children}</>
   );
-};
+}

@@ -87,6 +87,7 @@ export interface SendMessagePayload {
   sender: {
     id: number;
     thumbnail?: string;
+    name?: string;
   };
   file?: File;
   contentAttributes?: {

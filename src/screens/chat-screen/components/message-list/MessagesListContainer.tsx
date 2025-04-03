@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import { useChatWindowContext } from '@/context';
 import { Platform, Animated } from 'react-native';
@@ -15,7 +15,7 @@ import { conversationActions } from '@/store/conversation/conversationActions';
 import { selectAttachments } from '@/store/conversation/sendMessageSlice';
 import { getGroupedMessages, isAnEmailChannel } from '@/utils';
 import { MessagesList } from './MessagesList';
-import tailwind from 'twrnc';
+import { style as tailwind } from 'twrnc';
 import { conversationParticipantActions } from '@/store/conversation-participant/conversationParticipantActions';
 import { MESSAGE_TYPES } from '@/constants';
 import { Message } from '@/types';
@@ -70,7 +70,7 @@ const PlatformSpecificKeyboardWrapperComponent =
 export const MessagesListContainer = () => {
   const { conversationId } = useChatWindowContext();
   const dispatch = useAppDispatch();
-  const [isFlashListReady, setFlashListReady] = React.useState(false);
+  const [isFlashListReady, setFlashListReady] = useState(false);
 
   const conversation = useAppSelector(state => selectConversationById(state, conversationId));
   const isAllMessagesFetched = useAppSelector(selectIsAllMessagesFetched);
@@ -88,7 +88,7 @@ export const MessagesListContainer = () => {
     if (conversation) {
       dispatch(conversationActions.markMessageRead({ conversationId }));
     }
-  }, []);
+  }, [conversation, conversationId, dispatch]);
 
   const lastMessageId = useCallback(() => {
     if (messages && messages.length) {
@@ -121,7 +121,7 @@ export const MessagesListContainer = () => {
   useEffect(() => {
     loadMessages({ loadingMessagesForFirstTime: true });
     dispatch(conversationParticipantActions.index({ conversationId }));
-  }, []);
+  }, [conversationId, dispatch, loadMessages]);
 
   const groupedMessages = getGroupedMessages(messages);
 
@@ -145,7 +145,7 @@ export const MessagesListContainer = () => {
 
   return (
     <PlatformSpecificKeyboardWrapperComponent
-      style={tailwind.style('flex-1 bg-white')}
+      style={tailwind('flex-1 bg-white')}
       interpolator="linear">
       <MessagesList
         messages={messagesWithGrouping}

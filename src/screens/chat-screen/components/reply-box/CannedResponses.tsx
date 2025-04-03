@@ -44,7 +44,7 @@ export const CannedResponses = (props: CannedResponsesProps) => {
   useEffect(() => {
     const searchKey = props.searchKey.slice(1);
     dispatch(cannedResponseActions.index({ searchKey }));
-  }, [props.searchKey]);
+  }, [dispatch, props.searchKey]);
 
   if (!props.searchKey || cannedResponses.length === 0) {
     return null;
