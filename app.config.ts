@@ -12,6 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     name: 'Chatwoot',
     slug: process.env.EXPO_PUBLIC_APP_SLUG || 'chatwoot-mobile',
+    scheme: 'chatwoot',
     version: '4.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
