@@ -101,19 +101,22 @@ export const ChatHeaderContainer = (props: ChatScreenHeaderProps) => {
     navigation.dispatch(navigateToScreen);
   };
 
-  const handleNavigation = (url?: string, title?: string) => {
-    if (url) {
-      const navigateToScreen = StackActions.push('Dashboard', {
-        url,
-        title,
-        conversation,
-        currentUser,
-      });
-      navigation.dispatch(navigateToScreen);
-    } else {
-      chatPagerView.current?.setPage(1);
-    }
-  };
+  const handleNavigation = useCallback(
+    (url?: string, title?: string) => {
+      if (url) {
+        const navigateToScreen = StackActions.push('Dashboard', {
+          url,
+          title,
+          conversation,
+          currentUser,
+        });
+        navigation.dispatch(navigateToScreen);
+      } else {
+        chatPagerView.current?.setPage(1);
+      }
+    },
+    [conversation, currentUser, navigation, chatPagerView],
+  );
 
   const toggleChatStatus = async () => {
     const updatedStatus =
@@ -148,7 +151,7 @@ export const ChatHeaderContainer = (props: ChatScreenHeaderProps) => {
         : undefined,
       ...dashboardRoutes,
     ].filter((item): item is DashboardList => item !== undefined);
-  }, []);
+  }, [dashboardRoutes, handleNavigation, pagerViewIndex]);
 
   const sLAStatusText = () => {
     const upperCaseType = slaStatus?.type?.toUpperCase(); // FRT, NRT, or RT
