@@ -1,7 +1,6 @@
 import React from 'react';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import tailwind from 'twrnc';
-
+import tw from 'twrnc'; // TWRNC is typically used as a tagged template
 import { Channel, Message } from '@/types';
 import { Avatar } from '@/components-next/common';
 
@@ -11,6 +10,7 @@ import { MenuOption, MessageMenu } from '../message-menu';
 import { MessageTextCell } from './MessageTextCell';
 import { PrivateTextCell } from './PrivateTextCell';
 import { MESSAGE_TYPES } from '@/constants';
+import botAvatar from '../../../../assets/local/bot-avatar.png';
 
 export type TextMessageCellProps = {
   item: Message;
@@ -19,7 +19,7 @@ export type TextMessageCellProps = {
 };
 
 export const TextMessageCell = (props: TextMessageCellProps) => {
-  const messageItem = props.item as Message;
+  const { item: messageItem, channel, menuOptions } = props;
 
   const {
     messageType,
@@ -32,54 +32,53 @@ export const TextMessageCell = (props: TextMessageCellProps) => {
     createdAt,
     contentAttributes,
   } = messageItem;
-  const { channel } = props;
-  const isIncoming = messageItem.messageType === MESSAGE_TYPES.INCOMING;
-  const isOutgoing = messageItem.messageType === MESSAGE_TYPES.OUTGOING;
-  const isActivity = messageItem.messageType === MESSAGE_TYPES.ACTIVITY;
-  const isTemplate = messageItem.messageType === MESSAGE_TYPES.TEMPLATE;
+
+  const isIncoming = messageType === MESSAGE_TYPES.INCOMING;
+  const isOutgoing = messageType === MESSAGE_TYPES.OUTGOING;
+  const isActivity = messageType === MESSAGE_TYPES.ACTIVITY;
+  const isTemplate = messageType === MESSAGE_TYPES.TEMPLATE;
+
   const isSentByBot = !sender || ('type' in sender && sender.type === 'agent_bot');
   const errorMessage = contentAttributes?.externalError || '';
-
-  const { menuOptions } = props;
 
   return (
     <Animated.View
       entering={FadeIn.duration(350)}
       style={[
-        tailwind.style(
-          'my-[1px]',
-          isIncoming && 'items-start',
-          isOutgoing && 'items-end',
-          isTemplate && 'items-end',
-          isActivity && 'items-center',
-          !shouldRenderAvatar && isIncoming ? 'ml-7' : '',
-          !shouldRenderAvatar && isOutgoing ? 'pr-7' : '',
-          !shouldRenderAvatar && isTemplate ? 'pr-7' : '',
-          shouldRenderAvatar ? 'mb-1' : '',
-          messageItem.private ? 'my-2' : '',
-        ),
+        // Tagged templates for each style snippet:
+        tw`my-[1px]`,
+        isIncoming && tw`items-start`,
+        (isOutgoing || isTemplate) && tw`items-end`,
+        isActivity && tw`items-center`,
+
+        // shift horizontally if no avatar
+        !shouldRenderAvatar && isIncoming && tw`ml-7`,
+        !shouldRenderAvatar && (isOutgoing || isTemplate) && tw`pr-7`,
+        shouldRenderAvatar && tw`mb-1`,
+        messageItem.private && tw`my-2`,
       ]}>
-      <Animated.View style={tailwind.style('flex flex-row')}>
-        {sender && sender?.name && isIncoming && shouldRenderAvatar ? (
-          <Animated.View style={tailwind.style('flex items-end justify-end mr-1')}>
+      <Animated.View style={tw`flex flex-row`}>
+        {sender?.name && isIncoming && shouldRenderAvatar && (
+          <Animated.View style={tw`flex items-end justify-end mr-1`}>
             <Avatar
-              size={'md'}
+              size="md"
               src={sender?.thumbnail ? { uri: sender.thumbnail } : undefined}
-              name={sender?.name || ''}
+              name={sender.name}
             />
           </Animated.View>
-        ) : null}
+        )}
+
         <MessageMenu menuOptions={menuOptions}>
-          <React.Fragment>
+          <>
             {isPrivate ? (
-              <React.Fragment>
-                <PrivateTextCell text={content} timeStamp={createdAt} />
-              </React.Fragment>
+              <PrivateTextCell text={content} timeStamp={createdAt} />
             ) : (
-              <React.Fragment>
+              <>
                 {(isOutgoing && !isSentByBot) || isIncoming ? (
                   <MessageTextCell
-                    {...{ isActivity, isIncoming, isOutgoing }}
+                    isActivity={isActivity}
+                    isIncoming={isIncoming}
+                    isOutgoing={isOutgoing}
                     text={content}
                     timeStamp={createdAt}
                     status={status}
@@ -97,7 +96,7 @@ export const TextMessageCell = (props: TextMessageCellProps) => {
                   <BotTextCell
                     text={content}
                     timeStamp={createdAt}
-                    status={messageItem.status}
+                    status={status}
                     isAvatarRendered={shouldRenderAvatar}
                     channel={channel}
                     messageType={messageType}
@@ -106,24 +105,21 @@ export const TextMessageCell = (props: TextMessageCellProps) => {
                     errorMessage={errorMessage}
                   />
                 ) : null}
-                {isActivity ? <ActivityTextCell text={content} timeStamp={createdAt} /> : null}
-              </React.Fragment>
+                {isActivity && <ActivityTextCell text={content} timeStamp={createdAt} />}
+              </>
             )}
-          </React.Fragment>
+          </>
         </MessageMenu>
-        {shouldRenderAvatar && (isPrivate || isOutgoing || isTemplate) ? (
-          <Animated.View style={tailwind.style('flex items-end justify-end ml-1')}>
+
+        {shouldRenderAvatar && (isPrivate || isOutgoing || isTemplate) && (
+          <Animated.View style={tw`flex items-end justify-end ml-1`}>
             <Avatar
-              size={'md'}
-              src={
-                isTemplate || isSentByBot
-                  ? require('../../../../assets/local/bot-avatar.png')
-                  : { uri: sender?.thumbnail }
-              }
+              size="md"
+              src={isTemplate || isSentByBot ? botAvatar : { uri: sender?.thumbnail }}
               name={sender?.name || ''}
             />
           </Animated.View>
-        ) : null}
+        )}
       </Animated.View>
     </Animated.View>
   );
