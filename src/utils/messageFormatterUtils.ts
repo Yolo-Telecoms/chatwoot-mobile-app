@@ -1,4 +1,4 @@
-import markdownToTxt from '@chatwoot/markdown-to-txt';
+import { markdownToTxt } from '@chatwoot/markdown-to-txt';
 
 export const getPlainText = (message: string) => {
   try {

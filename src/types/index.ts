@@ -11,7 +11,7 @@ export * from './Message';
 export * from './Team';
 export * from './Account';
 
-export interface IconProps extends PathProps {}
+export type IconProps = PathProps;
 
 export interface GenericListType {
   key?: string;

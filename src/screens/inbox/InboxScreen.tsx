@@ -4,6 +4,7 @@ import Animated, {
   LinearTransition,
   runOnJS,
   useAnimatedScrollHandler,
+  SharedValue,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
@@ -115,10 +116,18 @@ const InboxList = () => {
   }, [clearAndFetchNotifications, sortOrder]);
 
   const { openedRowIndex } = useInboxListStateContext();
-
-  const handleRender = useCallback(({ item, index }: FlashListRenderItemType) => {
-    return <InboxItemContainer item={item} index={index} openedRowIndex={openedRowIndex} />;
-  }, []);
+  const handleRender = useCallback(
+    ({ item, index }: FlashListRenderItemType) => {
+      return (
+        <InboxItemContainer
+          item={item}
+          index={index}
+          openedRowIndex={openedRowIndex as SharedValue<number | null>}
+        />
+      );
+    },
+    [openedRowIndex],
+  );
 
   const scrollHandler = useAnimatedScrollHandler({
     onBeginDrag: () => {
@@ -159,6 +168,7 @@ const InboxList = () => {
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}
       ListFooterComponent={ListFooterComponent}
+      // @ts-expect-error - AnimatedFlashlist type doesn't properly recognize renderItem prop type
       renderItem={handleRender}
       contentContainerStyle={tailwind.style(`pb-[${TAB_BAR_HEIGHT - 1}px]`)}
     />

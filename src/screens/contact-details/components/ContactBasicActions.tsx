@@ -10,28 +10,22 @@ import { useHaptic, useScaleAnimation } from '@/utils';
 import i18n from '@/i18n';
 import { openNumber, openEmail } from '@/helpers/UrlHelper';
 
-const contactOptions = [
-  {
-    contactType: 'call',
-    icon: <PhoneIcon strokeWidth={2} stroke={tailwind.color('bg-blue-800')} />,
-  },
-  {
-    contactType: 'email',
-    icon: <MailIcon strokeWidth={2} stroke={tailwind.color('bg-blue-800')} />,
-  },
-];
+type ContactOptionType = {
+  contactType: string;
+  icon: JSX.Element;
+};
 
 type ContactOptionProps = {
-  option: (typeof contactOptions)[0];
+  option: ContactOptionType;
   handleOptionPress?: () => void;
 };
 
+// Same constants as before
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const OPTION_WIDTH = (SCREEN_WIDTH - 32 - 12 * 3) / 2;
 
 const ContactOption = (props: ContactOptionProps) => {
   const { option, handleOptionPress } = props;
-
   const { handlers, animatedStyle } = useScaleAnimation();
   const hapticSelection = useHaptic();
 
