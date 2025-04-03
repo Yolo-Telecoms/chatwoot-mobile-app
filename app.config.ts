@@ -3,6 +3,12 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
+  const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || '121e1dd0-3d16-48fe-8fdd-aa99a7e2a236';
+
+  // Get package names dynamically from env vars with sensible defaults
+  const androidPackage = process.env.EXPO_PUBLIC_ANDROID_PACKAGE_NAME || 'com.chatwoot.app';
+  const iosBundleIdentifier = process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER || 'com.chatwoot.app';
+
   return {
     name: 'Chatwoot',
     slug: process.env.EXPO_PUBLIC_APP_SLUG || 'chatwoot-mobile',
@@ -17,7 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.chatwoot.app',
+      bundleIdentifier: iosBundleIdentifier,
       infoPlist: {
         NSCameraUsageDescription:
           'This app requires access to the camera to upload images and videos.',
@@ -39,7 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'com.chatwoot.app',
+      package: androidPackage,
       permissions: [
         'android.permission.CAMERA',
         'android.permission.READ_EXTERNAL_STORAGE',
@@ -65,11 +71,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     extra: {
       eas: {
-        projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+        projectId,
         storybookEnabled: process.env.EXPO_STORYBOOK_ENABLED,
       },
     },
-    owner: 'chatwoot',
+    owner: 'yolo_telecoms',
     plugins: [
       [
         'react-native-permissions',
@@ -93,12 +99,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           android: {
             compileSdkVersion: 34,
             targetSdkVersion: 34,
-            newArchEnabled: false, // 👈 Disable Bridgeless (New Architecture)
+            newArchEnabled: false,
             extraMavenRepos: ['$rootDir/../../../node_modules/@notifee/react-native/android/libs'],
           },
           ios: {
             useFrameworks: 'static',
-            newArchEnabled: false, // 👈 Disable Bridgeless (New Architecture)
+            newArchEnabled: false,
           },
         },
       ],
