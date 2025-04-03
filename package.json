@@ -71,7 +71,6 @@
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.9",
     "expo-web-browser": "~14.0.2",
-    "i18n": "^0.15.1",
     "i18n-js": "^3.9.2",
     "i18next": "^24.2.3",
     "lodash": "^4.17.21",
