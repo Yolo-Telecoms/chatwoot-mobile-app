@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React from 'react';
+import React, { memo } from 'react';
 import Animated, { SharedValue } from 'react-native-reanimated';
 
 import { notificationActions } from '@/store/notification/notificationAction';
@@ -23,7 +23,7 @@ type InboxItemContainerProps = {
   openedRowIndex: SharedValue<number | null>;
 };
 
-const UnreadComponent = React.memo(() => {
+const UnreadComponent = memo(() => {
   return (
     <Animated.View style={tailwind.style('flex justify-center items-center')}>
       <Icon icon={<MarkAsRead />} size={24} />
@@ -31,7 +31,7 @@ const UnreadComponent = React.memo(() => {
   );
 });
 
-const ReadComponent = React.memo(() => {
+const ReadComponent = memo(() => {
   return (
     <Animated.View style={tailwind.style('flex justify-center items-center')}>
       <Icon icon={<MarkAsUnRead />} size={24} />
@@ -39,7 +39,7 @@ const ReadComponent = React.memo(() => {
   );
 });
 
-const DeleteComponent = React.memo(() => {
+const DeleteComponent = memo(() => {
   return (
     <Animated.View style={tailwind.style('flex justify-center items-center')}>
       <Icon icon={<DeleteIcon />} size={24} />
