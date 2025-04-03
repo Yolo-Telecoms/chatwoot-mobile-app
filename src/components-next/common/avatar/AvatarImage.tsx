@@ -1,12 +1,18 @@
 import React, { useEffect } from 'react';
-import { Image } from 'expo-image';
-
+import { Image, ImageProps as ExpoImageProps, ImageErrorEventData } from 'expo-image';
 import { avatarTheme, tailwind } from '@/theme';
 import { cx } from '@/utils';
 
-import { AvatarProps } from './Avatar';
-
-interface AvatarImageProps extends Pick<AvatarProps, 'imageProps' | 'src' | 'squared' | 'size'> {
+interface AvatarImageProps {
+  /** Additional expo-image props (no RN props) */
+  imageProps?: Partial<ExpoImageProps>;
+  /** The source for the image */
+  src?: ExpoImageProps['source'];
+  /** If true, the avatar is square */
+  squared?: boolean;
+  /** Size key for some theme definition */
+  size: keyof typeof avatarTheme.borderRadius.size;
+  /** Called if no valid URI or the image fails to load */
   handleFallback: () => void;
 }
 
@@ -17,20 +23,16 @@ export const AvatarImage: React.FC<AvatarImageProps> = ({
   size,
   handleFallback,
 }) => {
-  const onError = () => {
+  // If there's a remote image with empty URI, call fallback immediately
+  useEffect(() => {
+    if (typeof src === 'object' && 'uri' in src && !src.uri) {
+      handleFallback();
+    }
+  }, [src, handleFallback]);
+
+  const handleExpoImageError = (_err: ImageErrorEventData) => {
     handleFallback();
   };
-
-  useEffect(() => {
-    if (
-      typeof src === 'object' &&
-      'uri' in src && // Check if it's a remote image source
-      !src.uri // Check if URI is empty
-    ) {
-      onError();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
 
   return (
     <Image
@@ -39,10 +41,7 @@ export const AvatarImage: React.FC<AvatarImageProps> = ({
         avatarTheme.borderRadius.size[size],
         tailwind.style(cx(avatarTheme.image, !squared ? avatarTheme.circular : '')),
       ]}
-      // Seems to be tricky to set the right type here, but as we are not
-      // doing anything with the error data, we can ignore the TS here
-      // @ts-ignore
-      onError={onError}
+      onError={handleExpoImageError}
       {...imageProps}
     />
   );
