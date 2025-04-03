@@ -7,28 +7,27 @@ import type {
 } from 'react-native';
 import { StyleSheet } from 'react-native';
 
-/** A generic function type: any params, any return */
-type AnyFn = (...args: unknown[]) => unknown;
-
 /**
- * Type guard: checks if `value` is a function
- */
-function isFunction(value: unknown): value is AnyFn {
-  return typeof value === 'function';
-}
-
-/**
- * If `valueOrFn` is a function, call it with `args`, otherwise just return it.
+ * If `valueOrFn` is a function, call it with `args`, otherwise return as-is.
  */
 function runIfFn<T, Args extends unknown[]>(
   valueOrFn: T | ((...fnArgs: Args) => T),
   ...args: Args
 ): T {
-  return isFunction(valueOrFn) ? valueOrFn(...args) : valueOrFn;
+  // Instead of a generic "isFunction" type guard, we do a manual cast here.
+  if (typeof valueOrFn === 'function') {
+    const fn = valueOrFn as (...fnArgs: Args) => T;
+    return fn(...args);
+  }
+  return valueOrFn;
 }
 
-const defaultAnchorPoint = { x: 0.5, y: 0.5 };
-
+/**
+ * styleAdapter:
+ *  - Accepts a `style` that may be a style object or a function returning a style.
+ *  - If `touchState` is provided, calls the style function with that state.
+ *  - Flattens any array of styles.
+ */
 export const styleAdapter = (
   style: StyleProp<ViewStyle> | ((state: PressableStateCallbackType) => StyleProp<ViewStyle>),
   touchState?: PressableStateCallbackType,
