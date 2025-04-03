@@ -56,8 +56,8 @@ export const AudioBubblePlayer = (props: AudioPlayerProps) => {
   const currentPosition = useSharedValue(0);
   const totalDuration = useSharedValue(0);
 
-  const audioPlayBackStatus = (data: any) => {
-    const playBackData = data.data as PlayBackType;
+  const audioPlayBackStatus = (args: { status: unknown; data?: PlayBackType }) => {
+    const playBackData = args.data;
     if (playBackData) {
       currentPosition.value = playBackData.currentPosition;
       totalDuration.value = playBackData.duration;
