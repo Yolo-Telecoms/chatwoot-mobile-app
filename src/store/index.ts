@@ -13,11 +13,12 @@ import {
 import { appReducer } from '@/store/reducers';
 import { setStore } from './storeAccessor';
 import { contactListenerMiddleware } from './contact/contactListener';
+import ReactotronConfig from '../../ReactotronConfig';
 
 // Disable this in testing environment
 const shouldLoadDebugger = __DEV__ && !process.env.JEST_WORKER_ID;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const reactotronInstance = shouldLoadDebugger ? require('../../ReactotronConfig').default : null;
+const reactotronInstance = shouldLoadDebugger ? ReactotronConfig : null;
 
 const CURRENT_VERSION = 2;
 
