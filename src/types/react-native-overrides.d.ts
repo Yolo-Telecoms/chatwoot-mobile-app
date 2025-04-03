@@ -1,9 +1,10 @@
-declare module 'react-native/Libraries/Text/TextNativeComponent' {
+declare module 'react-native/Libraries/Components/View/ViewNativeComponent' {
   import { HostComponent } from 'react-native';
+  const ViewNativeComponent: HostComponent<unknown>;
+  export default ViewNativeComponent;
+}
 
-  // Provide a shape that suits your usage.
-  // For a minimal approach, you can give it an `any` or `unknown` type:
-  const TextNativeComponent: HostComponent<unknown>;
-
-  export default TextNativeComponent;
+declare module 'react-native/Libraries/Text/TextAncestor' {
+  const TextAncestor: unknown;
+  export default TextAncestor;
 }

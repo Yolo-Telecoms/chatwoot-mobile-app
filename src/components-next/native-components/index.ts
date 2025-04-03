@@ -1,28 +1,34 @@
-// A Function from TamagUI - Open Source Library
-// Credit goes to the Author
-export function getBaseViews() {
-  const native = require('react-native');
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// File: src/components-next/native-components/index.ts
 
-  let View;
-  let TextAncestor;
+import * as ReactNative from 'react-native';
+import ViewNativeComponent from 'react-native/Libraries/Components/View/ViewNativeComponent';
+import TextAncestorContext from 'react-native/Libraries/Text/TextAncestor';
+
+/**
+ * Returns base React Native views (with special fallback logic).
+ */
+export function getBaseViews() {
+  // We'll be lenient: treat `View` as `any` so we don't conflict with
+  // ReactNative.View's static property forceTouchAvailable.
+  let View: any = ReactNative.View;
+  let TextAncestor: any = null;
 
   if (process.env.NODE_ENV !== 'test') {
-    View = require('react-native/Libraries/Components/View/ViewNativeComponent').default;
-    TextAncestor = require('react-native/Libraries/Text/TextAncestor');
-  }
-
-  if (!View) {
-    View = native.View || native.default.View;
+    View = ViewNativeComponent; // no forced type
+    TextAncestor = TextAncestorContext;
   }
 
   return {
     View,
-    Text: native.Text || native.default.Text,
-    StyleSheet: native.StyleSheet || native.default.StyleSheet,
+    // We can keep these typed normally, since they're from react-native
+    Text: ReactNative.Text,
+    StyleSheet: ReactNative.StyleSheet,
     TextAncestor,
-    Pressable: native.Pressable || native.default.Pressable,
+    Pressable: ReactNative.Pressable,
   };
 }
 
+// Export other modules as well
 export * from './NText';
 export * from './NView';
