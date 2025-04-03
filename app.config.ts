@@ -16,15 +16,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'light',
+
+    newArchEnabled: false,
+
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff',
     },
-
-    // Recommended root-level placement
-    newArchEnabled: false,
-
     ios: {
       supportsTablet: true,
       bundleIdentifier: iosBundleIdentifier,
