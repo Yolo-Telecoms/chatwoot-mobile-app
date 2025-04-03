@@ -12,52 +12,56 @@ export interface Size {
 
 const isValidSize = (size: Size): boolean => {
   'worklet';
-  return size && size.width > 0 && size.height > 0;
+  return size.width > 0 && size.height > 0;
 };
 
 const defaultAnchorPoint = { x: 0.5, y: 0.5 };
 
-export const withAnchorPoint = (transform: TransformsStyle, anchorPoint: Point, size: Size) => {
+export function withAnchorPoint(
+  transform: TransformsStyle,
+  anchorPoint: Point,
+  size: Size,
+): TransformsStyle {
   'worklet';
+
   if (!isValidSize(size)) {
     return transform;
   }
 
-  let injectedTransform = transform.transform;
-  if (!injectedTransform) {
+  const t = transform.transform; // Use `const` instead of `let`
+  if (!t) {
     return transform;
   }
 
-  if (anchorPoint.x !== defaultAnchorPoint.x && size.width) {
-    const shiftTranslateX = [];
+  if (typeof t === 'string') {
+    // If transform is a string, we can’t push objects into it
+    return transform;
+  }
 
-    // shift before rotation
-    shiftTranslateX.push({
-      translateX: size.width * (anchorPoint.x - defaultAnchorPoint.x),
-    });
-    injectedTransform = [...shiftTranslateX, ...injectedTransform];
-    // shift after rotation
-    injectedTransform.push({
+  // Make a mutable copy so we can safely .push()
+  const transforms = Array.isArray(t) ? [...t] : [t];
+
+  // X-shift
+  if (anchorPoint.x !== defaultAnchorPoint.x && size.width) {
+    const shiftTranslateX = [{ translateX: size.width * (anchorPoint.x - defaultAnchorPoint.x) }];
+    // Insert before
+    transforms.unshift(...shiftTranslateX);
+    // Insert after
+    transforms.push({
       translateX: size.width * (defaultAnchorPoint.x - anchorPoint.x),
     });
   }
 
-  if (!Array.isArray(injectedTransform)) {
-    return { transform: injectedTransform };
-  }
-
+  // Y-shift
   if (anchorPoint.y !== defaultAnchorPoint.y && size.height) {
-    let shiftTranslateY = [];
-    // shift before rotation
-    shiftTranslateY.push({
-      translateY: size.height * (anchorPoint.y - defaultAnchorPoint.y),
-    });
-    injectedTransform = [...shiftTranslateY, ...injectedTransform];
-    // shift after rotation
-    injectedTransform.push({
+    const shiftTranslateY = [{ translateY: size.height * (anchorPoint.y - defaultAnchorPoint.y) }];
+    // Insert before
+    transforms.unshift(...shiftTranslateY);
+    // Insert after
+    transforms.push({
       translateY: size.height * (defaultAnchorPoint.y - anchorPoint.y),
     });
   }
 
-  return { transform: injectedTransform };
-};
+  return { transform: transforms };
+}

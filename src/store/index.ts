@@ -55,7 +55,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  enhancers: shouldLoadDebugger ? [reactotronInstance.createEnhancer!()] : [],
+  enhancers: shouldLoadDebugger && reactotronInstance ? [reactotronInstance.createEnhancer()] : [],
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
