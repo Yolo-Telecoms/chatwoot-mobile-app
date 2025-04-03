@@ -1,3 +1,5 @@
+// File: app.config.ts
+
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {

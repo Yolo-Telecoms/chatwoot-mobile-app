@@ -2,3 +2,4 @@ node_modules
 # Add JS and JSX files here
 #*.js
 #*.jsx
+.storybook/storybook.requires.ts
