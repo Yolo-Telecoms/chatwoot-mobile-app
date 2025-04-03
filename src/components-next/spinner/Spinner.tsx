@@ -1,5 +1,7 @@
-import React from 'react';
-import { ViewProps } from 'react-native';
+// File: src/components-next/spinner/Spinner.tsx
+
+import { useEffect } from 'react';
+import { ViewProps, ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -9,7 +11,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import tailwind from 'twrnc';
+import tw from 'twrnc';
 
 import { LoadingIcon } from '../../svg-icons';
 import { withAnchorPoint } from '../../utils';
@@ -20,10 +22,18 @@ interface SpinnerProps extends Pick<ViewProps, 'style'> {
   stroke?: string;
 }
 
-export const Spinner = (props: SpinnerProps) => {
-  const { size, style = {}, stroke } = props;
+/**
+ * A type for Reanimated's style that extends ViewStyle
+ * but ensures `transform` is the only transform we set.
+ */
+type SpinnerViewStyle = Omit<ViewStyle, 'transform'> & {
+  transform?: { rotate: string }[];
+};
+
+export function Spinner({ size, style, stroke }: SpinnerProps) {
   const rotation = useSharedValue(0);
-  React.useEffect(() => {
+
+  useEffect(() => {
     rotation.value = withRepeat(
       withTiming(rotation.value + 1, {
         duration: 1350,
@@ -32,25 +42,27 @@ export const Spinner = (props: SpinnerProps) => {
       -1,
       false,
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const animatedStyle = useAnimatedStyle(() => {
-    const transforms = withAnchorPoint(
-      {
-        transform: [{ rotate: `${rotation.value * 360}deg` }],
-      },
+  }, [rotation]);
+
+  // Use the typed style so Reanimated sees it as a valid "DefaultStyle".
+  const animatedStyle = useAnimatedStyle<SpinnerViewStyle>(() => {
+    const rawTransforms = withAnchorPoint(
+      { transform: [{ rotate: `${rotation.value * 360}deg` }] },
       { x: 0.5, y: 0.5 },
       { width: size, height: size },
     );
-    return { ...transforms };
+
+    // Remove 'transformOrigin' or any other non-ViewStyle fields
+    const { transformOrigin, ...rest } = rawTransforms;
+    return rest as SpinnerViewStyle;
   });
 
   return (
     <Animated.View
       entering={FadeIn}
       exiting={FadeOut}
-      style={[tailwind.style('flex items-center justify-center'), animatedStyle, style]}>
+      style={[tw`flex items-center justify-center`, animatedStyle, style]}>
       <Icon icon={<LoadingIcon stroke={stroke} />} size={size} />
     </Animated.View>
   );
-};
+}

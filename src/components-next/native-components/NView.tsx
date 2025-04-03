@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-import Animated from 'react-native-reanimated';
+// File: src/components-next/native-components/NView.tsx
 
-export const NativeView =
-  require('react-native/Libraries/Components/View/ViewNativeComponent').default;
+import Animated from 'react-native-reanimated';
+// Import ES module instead of require()
+import ViewNativeComponent from 'react-native/Libraries/Components/View/ViewNativeComponent';
+
+export const NativeView = ViewNativeComponent;
 
 export const AnimatedNativeView = Animated.createAnimatedComponent(
   NativeView,
