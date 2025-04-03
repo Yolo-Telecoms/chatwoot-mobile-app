@@ -1,3 +1,5 @@
+// File: src/helpers/specs/settingsHelpers.spec.js
+
 import { extractDomain, checkValidUrl } from '../settingsHelper';
 
 describe('SettingsHelper', () => {
