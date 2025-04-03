@@ -1,3 +1,4 @@
+/* global jest */
 jest.mock('react-native-safari-view', () => {
   return {
     isAvailable: jest.fn(() => Promise.resolve(true)),
