@@ -52,7 +52,7 @@ const BaseBottomSheet = ({ children }: { children: React.ReactNode }) => {
   const { filtersModalSheetRef } = useRefsContext();
   useEffect(() => {
     filtersModalSheetRef.current?.present();
-  }, []);
+  }, [filtersModalSheetRef]);
 
   return (
     <Provider store={mockStore}>
