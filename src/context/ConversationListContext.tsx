@@ -1,39 +1,36 @@
-import React from 'react';
+// File: src/context/ConversationListContext.tsx
+
+import { createContext, useContext, FC } from 'react';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
-// Using Context because we need to access this shared value variable in various components
-// and we cannot use the useSharedValue hook inside redux store
+// We define our context's shape:
 interface ConversationListStateContextType {
   openedRowIndex: SharedValue<number>;
 }
 
-const ConversationListStateContext = React.createContext<
-  ConversationListStateContextType | undefined
->(undefined);
+// Create the context
+const ConversationListStateContext = createContext<ConversationListStateContextType | undefined>(
+  undefined,
+);
 
-const useConversationListStateContext = (): ConversationListStateContextType => {
-  const context = React.useContext(ConversationListStateContext);
+// Provide a custom hook to consume this context
+export const useConversationListStateContext = (): ConversationListStateContextType => {
+  const context = useContext(ConversationListStateContext);
   if (!context) {
     throw new Error(
-      'ConversationListStateContext: `ConversationListStateContext` is undefined. Seems you forgot to wrap component within the ConversationListStateProvider',
+      'ConversationListStateContext: `ConversationListStateContext` is undefined. Wrap your component in ConversationListStateProvider.',
     );
   }
-
   return context;
 };
 
-const ConversationListStateProvider: React.FC<
-  Partial<ConversationListStateContextType & { children: React.ReactNode }>
-> = props => {
+// Create our provider
+export const ConversationListStateProvider: FC<{ children?: React.ReactNode }> = props => {
   const openedRowIndex = useSharedValue<number>(-1);
-
-  const { children } = props;
 
   return (
     <ConversationListStateContext.Provider value={{ openedRowIndex }}>
-      {children}
+      {props.children}
     </ConversationListStateContext.Provider>
   );
 };
-
-export { ConversationListStateProvider, useConversationListStateContext };

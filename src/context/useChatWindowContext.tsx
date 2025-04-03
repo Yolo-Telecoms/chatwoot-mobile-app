@@ -1,8 +1,8 @@
-import React, { Ref, useRef, useState } from 'react';
+// File: src/context/useChatWindowContext.tsx
+
+import { createContext, useContext, useRef, useState, FC, ReactNode, Ref } from 'react';
 import { TextInputProps } from 'react-native';
 
-// Using Context because we need to access this shared value variable in various components
-// and we cannot use the useSharedValue hook inside Zustand store
 interface ChatWindowContextType {
   isAddMenuOptionSheetOpen: boolean;
   setAddMenuOptionSheetState: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,30 +20,33 @@ interface ChatWindowContextType {
   conversationId: number;
 }
 
-const ChatWindowContext = React.createContext<ChatWindowContextType | undefined>(undefined);
+const ChatWindowContext = createContext<ChatWindowContextType | undefined>(undefined);
 
-const useChatWindowContext = (): ChatWindowContextType => {
-  const context = React.useContext(ChatWindowContext);
+export function useChatWindowContext(): ChatWindowContextType {
+  const context = useContext(ChatWindowContext);
   if (!context) {
     throw new Error(
-      'ChatWindowContext: `ChatWindowContext` is undefined. Seems you forgot to wrap component within the CalendarProvider',
+      'ChatWindowContext: `ChatWindowContext` is undefined. Wrap your component in ChatWindowProvider.',
     );
   }
-
   return context;
-};
+}
 
-const ChatWindowProvider: React.FC<
-  Partial<ChatWindowContextType & { children: React.ReactNode }>
-> = props => {
+interface ChatWindowProviderProps {
+  children?: ReactNode;
+  conversationId?: number;
+}
+
+export const ChatWindowProvider: FC<ChatWindowProviderProps> = ({
+  children,
+  conversationId = 0,
+}) => {
   const [isAddMenuOptionSheetOpen, setAddMenuOptionSheetState] = useState(false);
   const [isTextInputFocused, setIsTextInputFocused] = useState(false);
   const [isVoiceRecorderOpen, setIsVoiceRecorderOpen] = useState(false);
   const [pagerViewIndex, setPagerViewIndex] = useState(0);
 
   const textInputRef = useRef<TextInputProps>(null);
-
-  const { children, conversationId = 0 } = props;
 
   return (
     <ChatWindowContext.Provider
@@ -63,5 +66,3 @@ const ChatWindowProvider: React.FC<
     </ChatWindowContext.Provider>
   );
 };
-
-export { ChatWindowProvider, useChatWindowContext };
