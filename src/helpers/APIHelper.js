@@ -1,13 +1,20 @@
+// File: src/helpers/APIHelper.js
+
 import axios from 'axios';
 import * as Sentry from '@sentry/react-native';
-
 import { API_URL } from '../constants/url';
 import I18n from '../i18n';
-
 import { showToast } from './ToastHelper';
 import { getHeaders, getBaseUrl } from '../services/auth';
-import { handleLogout } from '../reducer/authHelper';
 import { getStore } from '@/store/storeAccessor';
+
+function handleLogout() {
+  const store = getStore();
+  // Dispatch your Redux logout:
+  store.dispatch({ type: 'auth/logout' });
+  // Optionally show toast:
+  showToast({ message: I18n.t('ERRORS.SESSION_EXPIRED') });
+}
 
 const parseErrorCode = error => {
   Sentry.captureException(error);
@@ -29,6 +36,7 @@ API.interceptors.request.use(
     const headers = await getHeaders();
     config.baseURL = await getBaseUrl();
     const configHeaders = config.headers;
+
     if (headers) {
       config.headers = {
         ...configHeaders,

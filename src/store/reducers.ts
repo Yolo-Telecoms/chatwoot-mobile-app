@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 
-import authSlice from '@/store/auth/authSlice';
-import settingsSlice from '@/store/settings/settingsSlice';
+import { authSlice } from '@/store/auth/authSlice';
+import { settingsSlice } from '@/store/settings/settingsSlice';
 import conversationFilterSlice from '@/store/conversation/conversationFilterSlice';
 import conversationSelectedSlice from '@/store/conversation/conversationSelectedSlice';
 import conversationHeaderSlice from '@/store/conversation/conversationHeaderSlice';
@@ -26,8 +26,8 @@ import conversationParticipantSlice from '@/store/conversation-participant/conve
 import cannedResponseSlice from '@/store/canned-response/cannedResponseSlice';
 
 export const appReducer = combineReducers({
-  auth: authSlice,
-  settings: settingsSlice,
+  auth: authSlice.reducer,
+  settings: settingsSlice.reducer,
   conversationFilter: conversationFilterSlice,
   selectedConversation: conversationSelectedSlice,
   conversationHeader: conversationHeaderSlice,
