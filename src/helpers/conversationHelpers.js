@@ -1,4 +1,6 @@
-import { MESSAGE_STATUS, MESSAGE_TYPES } from 'constants';
+// File: src/helpers/conversationHelpers.js
+
+import { MESSAGE_STATUS, MESSAGE_TYPES } from '@/constants';
 import DateHelper from './DateHelper';
 
 const groupBy = require('lodash.groupby');
@@ -136,7 +138,7 @@ export const replaceMentionsWithUsernames = text => {
       result = result.replace(fullMatch, replacement);
     }
     return result;
-  } catch (error) {
+  } catch (_error) {
     return text;
   }
 };
@@ -220,7 +222,7 @@ export const extractConversationIdFromUrl = ({ url }) => {
     const conversationIdMatch = url.match(/\/conversations\/(\d+)/);
     const conversationId = conversationIdMatch ? parseInt(conversationIdMatch[1]) : null;
     return conversationId;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

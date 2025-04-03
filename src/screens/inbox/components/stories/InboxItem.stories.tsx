@@ -1,3 +1,5 @@
+// File: src/screens/inbox/components/stories/InboxItem.stories.tsx
+
 import { Meta } from '@storybook/react';
 import { InboxItem } from '../InboxItem';
 import { ScrollView, View, Text } from 'react-native';
@@ -45,7 +47,7 @@ const baseInboxItem = {
     thumbnail: 'https://i.pravatar.cc/300',
   },
   lastActivityAt: () => '2 hours ago',
-  inbox: conversation.inbox,
+  inbox: { ...conversation.inbox, provider: 'chatwoot' },
   additionalAttributes: {},
   pushMessageTitle: 'This is a sample message from the customer',
   notificationType: 'conversation_creation' as NotificationType,

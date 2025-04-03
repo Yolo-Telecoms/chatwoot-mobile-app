@@ -114,6 +114,7 @@
     "@babel/core": "^7.26.10",
     "@storybook/addon-ondevice-actions": "^8.6.2",
     "@storybook/addon-ondevice-controls": "^8.6.2",
+    "@storybook/react": "^8.6.12",
     "@storybook/react-native": "^8.6.2",
     "@testing-library/react-native": "^13.2.0",
     "@types/i18n": "^0.13.12",
@@ -133,6 +134,7 @@
     "react-dom": "18.3.1",
     "react-test-renderer": "18.3.1",
     "reactotron-react-native": "^5.1.12",
+    "storybook": "^8.6.12",
     "typescript": "^5.8.2"
   },
   "private": true,
