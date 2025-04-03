@@ -1,9 +1,12 @@
-import authReducer, { resetAuth, setAccount } from '@/store/auth/authSlice';
-import { mockUser } from './authMockData';
-import { AuthState } from '@/store/auth/authSlice'; // Add this import
+// File: src/store/auth/specs/authSlice.spec.ts
 
+import authReducer, { resetAuth, setAccount, AuthState } from '@/store/auth/authSlice';
+import { mockUser } from './authMockData'; // <-- we only import what's actually used
 import { authActions } from '@/store/auth/authActions';
-import { UserRole } from '@/types';
+
+// Remove these if not actually used in the tests
+// import { mockHeaders } from './authMockData';   // no longer used
+// import { UserRole } from '@/types';            // no longer used
 
 jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
@@ -27,6 +30,7 @@ jest.mock('@/services/APIService', () => ({
 }));
 
 describe('Auth Slice', () => {
+  // AuthState from your code
   const initialState: AuthState = {
     user: null,
     accessToken: null,
@@ -37,24 +41,17 @@ describe('Auth Slice', () => {
     headers: null,
     error: null,
   };
+
   it('should handle initial state', () => {
     expect(authReducer(undefined, { type: 'unknown' })).toEqual(initialState);
   });
 
   describe('reducers', () => {
-    // TODO: Fix this spec later
-    // it('should handle logout', () => {
-    //   const state = {
-    //     ...initialState,
-    //     user: mockUser,
-    //     headers: { 'access-token': 'token', uid: 'uid', client: 'client' },
-    //   };
-    //   console.log('state', authReducer(state, logout()));
-    //   expect(authReducer(state, logout())).toEqual(initialState);
-    // });
+    // it('should handle logout', ... ) // Skipped for now
 
     it('should handle resetAuth', () => {
-      const state = {
+      // Provide a valid "availability_status"
+      const state: AuthState = {
         ...initialState,
         user: {
           ...mockUser,
@@ -62,7 +59,7 @@ describe('Auth Slice', () => {
           pubsub_token: 'token',
           avatar_url: 'url',
           available_name: 'name',
-          role: 'agent' as UserRole,
+          availability_status: 'online' as const,
         },
         accessToken: 'token',
         headers: { 'access-token': 'token', uid: 'uid', client: 'client' },
@@ -76,7 +73,7 @@ describe('Auth Slice', () => {
     });
 
     it('should handle setAccount', () => {
-      const state = {
+      const state: AuthState = {
         ...initialState,
         user: {
           ...mockUser,
@@ -84,7 +81,8 @@ describe('Auth Slice', () => {
           pubsub_token: '',
           avatar_url: '',
           available_name: '',
-          role: 'agent' as UserRole,
+          // also fix availability_status here
+          availability_status: 'online' as const,
         },
       };
       expect(authReducer(state, setAccount(123))).toEqual(state);

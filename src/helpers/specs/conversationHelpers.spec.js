@@ -7,7 +7,7 @@ import {
   getGroupedMessages,
   getTypingUsersText,
   extractConversationIdFromUrl,
-} from 'helpers/conversationHelpers';
+} from '@/helpers/conversationHelpers';
 
 import { messages } from './fixtures/messages';
 
