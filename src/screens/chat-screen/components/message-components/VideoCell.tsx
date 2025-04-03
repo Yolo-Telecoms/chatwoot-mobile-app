@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+// File: src/screens/chat-screen/components/message-components/VideoCell.tsx
+
+import { useCallback, useEffect, useRef, useState, FC } from 'react';
 import { Platform, Pressable, Text } from 'react-native';
 import Animated, { Easing, FadeIn, FadeOut } from 'react-native-reanimated';
 import {
@@ -19,6 +21,10 @@ import { MenuOption, MessageMenu } from '../message-menu';
 import { MESSAGE_TYPES } from '@/constants';
 import { DeliveryStatus } from './DeliveryStatus';
 
+// Use ES imports instead of require()
+import playIconPng from '../../../../assets/local/PlayIcon.png';
+import imageCellTimeStampOverlay from '../../../../assets/local/ImageCellTimeStampOverlay.png';
+
 type VideoCellProps = {
   videoSrc: string;
   shouldRenderAvatar: boolean;
@@ -37,26 +43,22 @@ type VideoPlayerProps = Pick<VideoCellProps, 'videoSrc'> & {
   playerEnabled?: boolean;
 };
 
-export const VideoPlayer = (props: VideoPlayerProps) => {
-  const { videoSrc, playerEnabled = true } = props;
-  const video = React.useRef<Video>(null);
+export const VideoPlayer: FC<VideoPlayerProps> = ({ videoSrc, playerEnabled = true }) => {
+  const videoRef = useRef<Video>(null);
   const [playVideo, setPlayVideo] = useState(false);
-
   const [videoLoading, setVideoLoading] = useState(true);
+  const [videoStatus, setVideoStatus] = useState<AVPlaybackStatus | null>(null);
 
-  const [videoStatus, setVideoStatus] = React.useState<AVPlaybackStatus | null>(null);
   const handlePlayPress = () => {
     setPlayVideo(true);
-    video.current?.presentFullscreenPlayer();
-    video.current?.playAsync();
+    videoRef.current?.presentFullscreenPlayer();
+    videoRef.current?.playAsync();
   };
 
   useEffect(() => {
-    if (videoStatus?.isLoaded) {
-      if (videoStatus?.didJustFinish) {
-        video.current?.playFromPositionAsync(0);
-        setPlayVideo(false);
-      }
+    if (videoStatus?.isLoaded && videoStatus.didJustFinish) {
+      videoRef.current?.playFromPositionAsync(0);
+      setPlayVideo(false);
     }
   }, [videoStatus]);
 
@@ -70,8 +72,6 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
     }
   };
 
-  // To have a loader while the Video is loaded, and
-  // thumbnail is shown
   const handleOnLoadStart = useCallback(() => {
     setVideoLoading(true);
   }, []);
@@ -81,13 +81,11 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
   }, []);
 
   return (
-    <React.Fragment>
+    <>
       <Video
-        style={tailwind.style('w-full ios:h-full aspect-video')}
-        ref={video}
-        source={{
-          uri: videoSrc,
-        }}
+        ref={videoRef}
+        style={tailwind`w-full ios:h-full aspect-video`}
+        source={{ uri: videoSrc }}
         shouldPlay={playVideo}
         resizeMode={Platform.OS === 'android' ? ResizeMode.CONTAIN : ResizeMode.COVER}
         onLoadStart={handleOnLoadStart}
@@ -95,31 +93,28 @@ export const VideoPlayer = (props: VideoPlayerProps) => {
         onPlaybackStatusUpdate={handlePlaybackStatus}
         onFullscreenUpdate={handleOnFullScreenUpdate}
       />
-      {videoLoading ? (
-        <Animated.View style={tailwind.style('absolute inset-0 flex items-center justify-center')}>
+      {videoLoading && (
+        <Animated.View style={tailwind`absolute inset-0 flex items-center justify-center`}>
           <Spinner size={20} />
         </Animated.View>
-      ) : null}
-      {!playVideo && playerEnabled ? (
+      )}
+      {!playVideo && playerEnabled && (
         <Animated.View
           entering={FadeIn.duration(300).easing(Easing.ease)}
           exiting={FadeOut.duration(300).easing(Easing.ease)}
-          style={tailwind.style('absolute inset-0 flex items-center justify-center')}>
+          style={tailwind`absolute inset-0 flex items-center justify-center`}>
           <Pressable
             onPress={handlePlayPress}
-            style={tailwind.style('h-full w-full flex items-center justify-center')}>
-            <Image
-              source={require('../../../../assets/local/PlayIcon.png')}
-              style={tailwind.style('h-12 w-12 z-10')}
-            />
+            style={tailwind`h-full w-full flex items-center justify-center`}>
+            <Image source={playIconPng} style={tailwind`h-12 w-12 z-10`} />
           </Pressable>
         </Animated.View>
-      ) : null}
-    </React.Fragment>
+      )}
+    </>
   );
 };
 
-export const VideoCell = (props: VideoCellProps) => {
+export const VideoCell: FC<VideoCellProps> = props => {
   const {
     videoSrc,
     sender,
@@ -137,6 +132,9 @@ export const VideoCell = (props: VideoCellProps) => {
   const isIncoming = messageType === MESSAGE_TYPES.INCOMING;
   const isOutgoing = messageType === MESSAGE_TYPES.OUTGOING;
 
+  // Convert potential null or undefined to string | undefined
+  const avatarSrc = sender?.thumbnail ? { uri: sender.thumbnail ?? undefined } : undefined;
+
   return (
     <Animated.View
       entering={FadeIn.duration(300).easing(Easing.ease)}
@@ -148,12 +146,12 @@ export const VideoCell = (props: VideoCellProps) => {
         !shouldRenderAvatar && isOutgoing ? 'pr-7' : '',
         shouldRenderAvatar ? 'pb-2' : '',
       )}>
-      <Animated.View style={tailwind.style('flex flex-row')}>
-        {isIncoming && shouldRenderAvatar ? (
-          <Animated.View style={tailwind.style('flex items-end justify-end mr-1')}>
-            <Avatar size={'md'} src={{ uri: sender?.thumbnail }} name={sender?.name || ''} />
+      <Animated.View style={tailwind`flex flex-row`}>
+        {isIncoming && shouldRenderAvatar && (
+          <Animated.View style={tailwind`flex items-end justify-end mr-1`}>
+            <Avatar size="md" src={avatarSrc} name={sender?.name || ''} />
           </Animated.View>
-        ) : null}
+        )}
         <MessageMenu menuOptions={menuOptions}>
           <Animated.View
             style={tailwind.style(
@@ -166,19 +164,16 @@ export const VideoCell = (props: VideoCellProps) => {
                     : ''
                 : '',
             )}>
-            <VideoPlayer
-              {...{
-                videoSrc,
-              }}
-            />
+            <VideoPlayer videoSrc={videoSrc} />
+
             <Animated.View
-              pointerEvents={'none'}
+              pointerEvents="none"
               entering={FadeIn.duration(300).easing(Easing.ease)}
               exiting={FadeOut.duration(300).easing(Easing.ease)}>
               <ImageBackground
-                source={require('../../../../assets/local/ImageCellTimeStampOverlay.png')}
+                source={imageCellTimeStampOverlay}
                 style={tailwind.style(
-                  'absolute bottom-0 right-0 h-15 w-33 z-20 ',
+                  'absolute bottom-0 right-0 h-15 w-33 z-20',
                   shouldRenderAvatar
                     ? isOutgoing
                       ? 'rounded-br-none'
@@ -187,12 +182,9 @@ export const VideoCell = (props: VideoCellProps) => {
                         : ''
                     : '',
                 )}>
-                <Animated.View
-                  style={tailwind.style('flex flex-row absolute right-3 bottom-[5px]')}>
+                <Animated.View style={tailwind`flex flex-row absolute right-3 bottom-[5px]`}>
                   <Text
-                    style={tailwind.style(
-                      'text-xs font-inter-420-20 tracking-[0.32px] leading-[14px] text-whiteA-A12 pr-1',
-                    )}>
+                    style={tailwind`text-xs font-inter-420-20 tracking-[0.32px] leading-[14px] text-whiteA-A12 pr-1`}>
                     {unixTimestampToReadableTime(timeStamp)}
                   </Text>
                   <DeliveryStatus
@@ -208,11 +200,11 @@ export const VideoCell = (props: VideoCellProps) => {
             </Animated.View>
           </Animated.View>
         </MessageMenu>
-        {sender?.name && isOutgoing && shouldRenderAvatar ? (
-          <Animated.View style={tailwind.style('flex items-end justify-end ml-1')}>
-            <Avatar size={'md'} src={{ uri: sender?.thumbnail }} name={sender?.name} />
+        {sender?.name && isOutgoing && shouldRenderAvatar && (
+          <Animated.View style={tailwind`flex items-end justify-end ml-1`}>
+            <Avatar size="md" src={avatarSrc} name={sender.name} />
           </Animated.View>
-        ) : null}
+        )}
       </Animated.View>
     </Animated.View>
   );

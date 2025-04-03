@@ -46,7 +46,7 @@ export type ConversationItemProps = {
         waitingSince: number;
         status: string;
       }
-    | {};
+    | object;
 
   // Additional data
   additionalAttributes?: ConversationAdditionalAttributes;

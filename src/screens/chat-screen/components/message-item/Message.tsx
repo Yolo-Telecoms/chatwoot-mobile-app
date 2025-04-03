@@ -36,6 +36,7 @@ import { MenuOption, MessageMenu } from '../message-menu';
 import { tailwind } from '@/theme';
 import { Dimensions, View } from 'react-native';
 import { Avatar } from '@/components-next';
+import botAvatar from '../../../../assets/local/bot-avatar.png';
 // import { ImageMetadata } from '@/types';
 
 type MessageComponentProps = {
@@ -327,7 +328,7 @@ export const MessageComponent = (props: MessageComponentProps) => {
     if (!sender || sender.type === SENDER_TYPES.AGENT_BOT) {
       return {
         name: i18n.t('CONVERSATION.BOT'),
-        src: require('../../../../assets/local/bot-avatar.png'),
+        src: botAvatar,
       };
     }
 

@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 
 import { tailwind } from '@/theme';
 import { Image } from 'expo-image';
+import { typing } from '../../../../assets/local/typing.gif';
 
 type TypingIndicatorProps = {
   typingText: string;
@@ -22,7 +23,8 @@ export const TypingIndicator = ({ typingText }: TypingIndicatorProps) => {
           {typingText}
         </Text>
         <Image
-          source={require('../../../../assets/local/typing.gif')}
+          source={typing}
+          transition={1000}
           style={tailwind.style('w-8 h-8 ml-2')}
           contentFit="contain"
         />
