@@ -28,7 +28,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           'This app does not use Apple Music, but a system API may require this permission.',
         UIBackgroundModes: ['fetch', 'remote-notification'],
       },
-      // Please use the relative path to the google-services.json file
       googleServicesFile: process.env.EXPO_PUBLIC_IOS_GOOGLE_SERVICES_FILE,
       entitlements: {
         'aps-environment': 'production',
@@ -47,7 +46,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         'android.permission.WRITE_EXTERNAL_STORAGE',
         'android.permission.RECORD_AUDIO',
       ],
-      // Please use the relative path to the google-services.json file
       googleServicesFile: process.env.EXPO_PUBLIC_ANDROID_GOOGLE_SERVICES_FILE,
       intentFilters: [
         {
@@ -92,14 +90,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-build-properties',
         {
-          // https://github.com/invertase/notifee/issues/808#issuecomment-2175934609
           android: {
             compileSdkVersion: 34,
             targetSdkVersion: 34,
+            newArchEnabled: false, // 👈 Disable Bridgeless (New Architecture)
             extraMavenRepos: ['$rootDir/../../../node_modules/@notifee/react-native/android/libs'],
           },
           ios: {
             useFrameworks: 'static',
+            newArchEnabled: false, // 👈 Disable Bridgeless (New Architecture)
           },
         },
       ],
