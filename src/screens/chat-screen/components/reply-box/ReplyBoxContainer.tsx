@@ -1,3 +1,5 @@
+// File: src/screens/chat-screen/components/reply-box/ReplyBoxContainer.tsx
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Keyboard, TextInput } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
@@ -8,6 +10,7 @@ import Animated, {
   useDerivedValue,
   useAnimatedStyle,
   withSpring,
+  SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -55,7 +58,6 @@ import { CommandOptionsMenu } from '../message-components/CommandOptionsMenu';
 import { SendMessagePayload } from '@/store/conversation/conversationTypes';
 import { TypingIndicator } from './TypingIndicator';
 import { selectTypingUsersByConversationId } from '@/store/conversation/conversationTypingSlice';
-import { Agent, CannedResponse, Conversation } from '@/types';
 import AnalyticsHelper from '@/helpers/AnalyticsHelper';
 import { CONVERSATION_EVENTS } from '@/constants/analyticsEvents';
 import {
@@ -66,24 +68,22 @@ import {
 import { ReplyEmailHead } from './ReplyEmailHead';
 import { selectAssignableParticipantsByInboxId } from '@/store/assignable-agent/assignableAgentSelectors';
 
+import { Conversation, Agent, CannedResponse, Message } from '@/types';
+
 const SHEET_APPEAR_SPRING_CONFIG = {
   damping: 20,
   stiffness: 120,
 };
 
-// TODO: Implement this
-// const globalConfig = {
-//   directUploadsEnabled: true,
-// };
-
 const AnimatedKeyboardStickyView = Animated.createAnimatedComponent(KeyboardStickyView);
+
 const BottomSheetContent = () => {
   const hapticSelection = useHaptic();
   const dispatch = useAppDispatch();
   const { bottom } = useSafeAreaInsets();
   const { messageListRef } = useRefsContext();
 
-  // Selectors
+  // Redux store & local states
   const userId = useAppSelector(selectUserId);
   const userThumbnail = useAppSelector(selectUserThumbnail);
   const userName = useAppSelector(selectUserName);
@@ -92,7 +92,7 @@ const BottomSheetContent = () => {
   const quoteMessage = useAppSelector(selectQuoteMessage);
   const isPrivate = useAppSelector(selectIsPrivateMessage);
 
-  // Context
+  // Context from the chat window
   const {
     isAddMenuOptionSheetOpen,
     setAddMenuOptionSheetState,
@@ -105,68 +105,81 @@ const BottomSheetContent = () => {
   const { inboxId, canReply } = conversation || {};
   const inbox = useAppSelector(state => (inboxId ? selectInboxById(state, inboxId) : undefined));
 
+  // Agents
   const selectAgents = useAppSelector(selectAssignableParticipantsByInboxId);
   const agents = inboxId ? selectAgents(inboxId, '') : [];
 
+  // local states for email fields
   const [replyEditorMode, setReplyEditorMode] = useState(REPLY_EDITOR_MODES.REPLY);
   const [ccEmails, setCCEmails] = useState('');
   const [bccEmails, setBCCEmails] = useState('');
   const [toEmails, setToEmails] = useState('');
+
   const [selectedCannedResponse, setSelectedCannedResponse] = useState<string | null>(null);
 
-  const typingUsers = useAppSelector(selectTypingUsersByConversationId(conversationId));
+  // Typing users
+  const typingUsers = useAppSelector(state =>
+    selectTypingUsersByConversationId(state, conversationId),
+  );
   const typingText = useMemo(() => getTypingUsersText({ users: typingUsers }), [typingUsers]);
 
   const attachmentsLength = useMemo(() => attachedFiles.length, [attachedFiles.length]);
 
+  // Condition for email channels
   const shouldShowReplyHeader = inbox && isAnEmailChannel(inbox) && !isPrivate;
 
-  const lastEmail = useAppSelector(state =>
-    shouldShowReplyHeader ? getLastEmailInSelectedChat(state, { conversationId }) : null,
-  );
+  // 1) We assume `getLastEmailInSelectedChat` returns Message | undefined
+  // So now `lastEmail` can be `Message` or undefined.
+  const lastEmail: Message | undefined = useAppSelector(state => {
+    if (!shouldShowReplyHeader) return undefined;
+    const result = getLastEmailInSelectedChat(state, { conversationId });
+    return Array.isArray(result) && result.length === 0 ? undefined : (result as Message);
+  });
 
+  // 2) Populate cc/bcc/to from lastEmail
   useEffect(() => {
     if (!lastEmail) return;
-    const {
-      contentAttributes: { email: emailAttributes = {} },
-    } = lastEmail;
 
-    // Retrieve the email of the current conversation's sender
+    const emailAttributes =
+      (lastEmail?.contentAttributes?.email as { cc?: string[]; bcc?: string[]; from?: string[] }) ??
+      {};
+
+    // Retrieve the conversation contact
     const conversationContact = conversation?.meta?.sender?.email || '';
-    let cc = emailAttributes.cc ? [...emailAttributes.cc] : [];
-    let to = [];
 
-    // there might be a situation where the current conversation will include a message from a third person,
-    // and the current conversation contact is in CC.
-    // This is an edge-case, reported here: CW-1511 [ONLY FOR INTERNAL REFERENCE]
-    // So we remove the current conversation contact's email from the CC list if present
-    if (cc.includes(conversationContact)) {
-      cc = cc.filter(email => email !== conversationContact);
-    }
+    // cast so TS knows it's string[]
+    let cc = emailAttributes.cc ?? [];
+    let to: string[] = [];
 
-    // If the last incoming message sender is different from the conversation contact, add them to the "to"
-    // and add the conversation contact to the CC
-    if (!emailAttributes.from.includes(conversationContact)) {
-      to.push(...emailAttributes.from);
+    // remove conversation contact from CC
+    cc = cc.filter((email: string) => email !== conversationContact);
+
+    // If last incoming msg sender is different from the conversation contact
+    if (emailAttributes.from && !emailAttributes.from.includes(conversationContact)) {
+      to.push(...(emailAttributes.from as string[]));
       cc.push(conversationContact);
     }
 
-    // Remove the conversation contact's email from the BCC list if present
-    let bcc = (emailAttributes.bcc || []).filter(email => email !== conversationContact);
+    // remove conversation contact from BCC
+    let bcc = ((emailAttributes.bcc as string[]) || []).filter(
+      (email: string) => email !== conversationContact,
+    );
 
-    // Ensure only unique email addresses are in the CC list
+    // ensure only unique
     bcc = [...new Set(bcc)];
     cc = [...new Set(cc)];
     to = [...new Set(to)];
+
     setCCEmails(cc.join(', '));
     setBCCEmails(bcc.join(', '));
     setToEmails(to.join(', '));
-  }, [lastEmail]);
+  }, [lastEmail, conversation?.meta?.sender?.email, conversation]);
 
   const messageVariables = allMessageVariables({
     conversation: conversation as Conversation,
   });
 
+  // auto toggle private vs reply
   useEffect(() => {
     if (canReply || (inbox && isAWhatsAppChannel(inbox))) {
       setReplyEditorMode(REPLY_EDITOR_MODES.REPLY);
@@ -177,18 +190,19 @@ const BottomSheetContent = () => {
     }
   }, [inbox, canReply, dispatch]);
 
+  // The derived value for the “add menu option” sheet
   const derivedAddMenuOptionStateValue = useDerivedValue(() => {
     return isAddMenuOptionSheetOpen
       ? withSpring(1, SHEET_APPEAR_SPRING_CONFIG)
       : withSpring(0, SHEET_APPEAR_SPRING_CONFIG);
   });
 
-  const animatedInputWrapperStyle = useAnimatedStyle(
-    () => ({
+  // animate the input container
+  const animatedInputWrapperStyle = useAnimatedStyle(() => {
+    return {
       marginBottom: isTextInputFocused ? 0 : bottom,
-    }),
-    [isTextInputFocused],
-  );
+    };
+  }, [isTextInputFocused, bottom]);
 
   const handleShowAddMenuOption = () => {
     if (isAddMenuOptionSheetOpen) {
@@ -201,17 +215,18 @@ const BottomSheetContent = () => {
     }
   };
 
-  // TODO: Implement this
-  const setReplyToInPayload = (messagePayload: any) => {
-    //     ...(quoteMessage?.id && {
-    //       contentAttributes: { inReplyTo: quoteMessage.id },
-    //     }),
+  // Just a placeholder
+  const setReplyToInPayload = (messagePayload: SendMessagePayload) => {
+    // if (quoteMessage?.id) {
+    //   messagePayload.contentAttributes = { ...messagePayload.contentAttributes, inReplyTo: quoteMessage.id };
+    // }
     return messagePayload;
   };
 
   const getMessagePayload = (message: string) => {
     let updatedMessage = message;
     if (isPrivate) {
+      // handle mention
       const regex = /@\[([\w\s]+)\]\((\d+)\)/g;
       updatedMessage = message.replace(
         regex,
@@ -219,7 +234,7 @@ const BottomSheetContent = () => {
       );
     }
 
-    let messagePayload = {
+    let messagePayload: SendMessagePayload = {
       conversationId,
       message: updatedMessage,
       private: isPrivate,
@@ -228,37 +243,21 @@ const BottomSheetContent = () => {
         thumbnail: userThumbnail ?? '',
         name: userName ?? '',
       },
-      files: [],
-    } as SendMessagePayload;
+    };
+
     messagePayload = setReplyToInPayload(messagePayload);
 
-    if (attachedFiles && attachedFiles.length) {
-      // messagePayload.files = [];
-      // TODO: Implement this
-      // attachedFiles.forEach(attachment => {
-      //   if (globalConfig.directUploadsEnabled) {
-      //     messagePayload.files.push(attachment.blobSignedId);
-      //   } else {
-      //     messagePayload.files.push(attachment.resource.file);
-      //   }
-      // });
-      // TODO: Add support for multiple files later
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+    if (attachedFiles && attachedFiles.length > 0) {
+      // For now, we only handle single file
+      // @ts-expect-error: handle multiple attachments logic
       messagePayload.file = attachedFiles[0];
     }
 
-    // TODO: Implement this
-    if (ccEmails && !isPrivate) {
-      messagePayload.ccEmails = ccEmails;
-    }
-
-    if (bccEmails && !isPrivate) {
-      messagePayload.bccEmails = bccEmails;
-    }
-
-    if (toEmails && !isPrivate) {
-      messagePayload.toEmails = toEmails;
+    // For email fields
+    if (!isPrivate && isAnEmailChannel(inbox)) {
+      if (ccEmails) messagePayload.ccEmails = ccEmails;
+      if (bccEmails) messagePayload.bccEmails = bccEmails;
+      if (toEmails) messagePayload.toEmails = toEmails;
     }
 
     return messagePayload;
@@ -270,11 +269,6 @@ const BottomSheetContent = () => {
       (textInputRef.current as TextInput).clear();
     }
 
-    // const isOnWhatsApp =
-    //   isATwilioWhatsAppChannel(inbox) ||
-    //   isAWhatsAppCloudChannel(inbox) ||
-    //   is360DialogWhatsAppChannel(inbox?.channelType);
-
     AnalyticsHelper.track(CONVERSATION_EVENTS.SENT_MESSAGE);
 
     const undefinedVariables = getAllUndefinedVariablesInMessage({
@@ -283,20 +277,15 @@ const BottomSheetContent = () => {
     });
 
     if (undefinedVariables.length > 0) {
-      const undefinedVariablesCount = undefinedVariables.length > 1 ? undefinedVariables.length : 1;
+      const undefinedVariablesCount = undefinedVariables.length;
       const undefinedVariablesText = undefinedVariables.join(', ');
-      const undefinedVariablesMessage = `You have ${undefinedVariablesCount} undefined variable(s) in your message: ${undefinedVariablesText}. Please check and try again with valid variables.`;
-      Alert.alert(undefinedVariablesMessage);
+      Alert.alert(
+        `You have ${undefinedVariablesCount} undefined variable(s) in your message: ${undefinedVariablesText}. Please check and try again with valid variables.`,
+      );
     } else {
       const messagePayload = getMessagePayload(messageContent);
       sendMessage(messagePayload);
     }
-    // TODO: Implement this once we have add the support for multiple attachments
-    // https://github.com/chatwoot/chatwoot/pull/6125
-    // https://github.com/chatwoot/chatwoot/pull/6428
-    // if (isOnWhatsApp && !isPrivate) {
-    // sendMessageAsMultipleMessages(messageContent);
-    // }
   };
 
   const sendMessage = (messagePayload: SendMessagePayload) => {
@@ -310,6 +299,7 @@ const BottomSheetContent = () => {
     messageListRef?.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
+  // Check if we can show "attach file" button
   const shouldShowFileUpload =
     inbox &&
     (isAWebWidgetInbox(inbox) ||
@@ -321,22 +311,13 @@ const BottomSheetContent = () => {
       isATelegramChannel(inbox) ||
       isALineChannel(inbox));
 
+  // define max length per channel
   const maxLength = () => {
-    if (isPrivate) {
-      return MESSAGE_MAX_LENGTH.GENERAL;
-    }
-    if (isAFacebookInbox(inbox)) {
-      return MESSAGE_MAX_LENGTH.FACEBOOK;
-    }
-    if (isAWhatsAppChannel(inbox)) {
-      return MESSAGE_MAX_LENGTH.TWILIO_WHATSAPP;
-    }
-    if (isASmsInbox(inbox)) {
-      return MESSAGE_MAX_LENGTH.TWILIO_SMS;
-    }
-    if (isAnEmailChannel(inbox)) {
-      return MESSAGE_MAX_LENGTH.EMAIL;
-    }
+    if (isPrivate) return MESSAGE_MAX_LENGTH.GENERAL;
+    if (isAFacebookInbox(inbox)) return MESSAGE_MAX_LENGTH.FACEBOOK;
+    if (isAWhatsAppChannel(inbox)) return MESSAGE_MAX_LENGTH.TWILIO_WHATSAPP;
+    if (isASmsInbox(inbox)) return MESSAGE_MAX_LENGTH.TWILIO_SMS;
+    if (isAnEmailChannel(inbox)) return MESSAGE_MAX_LENGTH.EMAIL;
     return MESSAGE_MAX_LENGTH.GENERAL;
   };
 
@@ -353,12 +334,14 @@ const BottomSheetContent = () => {
 
   return (
     <Animated.View layout={LinearTransition.springify().damping(38).stiffness(240)}>
-      <AnimatedKeyboardStickyView style={[tailwind.style('bg-white'), animatedInputWrapperStyle]}>
+      <AnimatedKeyboardStickyView style={[tailwind`bg-white`, animatedInputWrapperStyle]}>
+        {/* if can't reply, show some warning */}
         {!canReply && inbox && conversation && (
           <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(10)}>
             <ReplyWarning inbox={inbox} conversation={conversation} />
           </Animated.View>
         )}
+
         {shouldShowCannedResponses && (
           <CannedResponses searchKey={messageContent} onSelect={onSelectCannedResponse} />
         )}
@@ -366,11 +349,13 @@ const BottomSheetContent = () => {
         <Animated.View
           layout={LinearTransition.springify().damping(38).stiffness(240)}
           style={tailwind.style(
-            `pb-2 border-t-[1px] border-t-blackA-A3 ${shouldShowReplyHeader ? 'pt-0' : 'pt-2'}`,
+            `pb-2 border-t-[1px] border-t-blackA-A3`,
+            // If reply header is shown, use 'pt-0', else 'pt-2'
+            shouldShowReplyHeader ? 'pt-0' : 'pt-2',
           )}>
           {quoteMessage && (
             <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(10)}>
-              <QuoteReply />s
+              <QuoteReply />
             </Animated.View>
           )}
 
@@ -387,11 +372,14 @@ const BottomSheetContent = () => {
 
           {typingText && <TypingIndicator typingText={typingText} />}
 
-          <Animated.View style={tailwind.style('flex flex-row px-1 items-end z-20 relative')}>
+          <Animated.View style={tailwind`flex flex-row px-1 items-end z-20 relative`}>
             {attachmentsLength === 0 && shouldShowFileUpload && (
               <AddCommandButton
                 onPress={handleShowAddMenuOption}
-                derivedAddMenuOptionStateValue={derivedAddMenuOptionStateValue}
+                // 4) If your child expects SharedValue<number>, do this cast:
+                derivedAddMenuOptionStateValue={
+                  derivedAddMenuOptionStateValue as unknown as SharedValue<number>
+                }
               />
             )}
             <MessageTextInput
