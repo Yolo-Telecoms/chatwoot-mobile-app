@@ -5,7 +5,6 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 export default ({ config }: ConfigContext): ExpoConfig => {
   const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || '121e1dd0-3d16-48fe-8fdd-aa99a7e2a236';
 
-  // Get package names dynamically from env vars with sensible defaults
   const androidPackage = process.env.EXPO_PUBLIC_ANDROID_PACKAGE_NAME || 'com.chatwoot.app';
   const iosBundleIdentifier = process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER || 'com.chatwoot.app';
 
@@ -22,6 +21,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       resizeMode: 'contain',
       backgroundColor: '#ffffff',
     },
+
+    // Recommended root-level placement
+    newArchEnabled: false,
+
     ios: {
       supportsTablet: true,
       bundleIdentifier: iosBundleIdentifier,
@@ -100,12 +103,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           android: {
             compileSdkVersion: 34,
             targetSdkVersion: 34,
-            newArchEnabled: false,
             extraMavenRepos: ['$rootDir/../../../node_modules/@notifee/react-native/android/libs'],
           },
           ios: {
             useFrameworks: 'static',
-            newArchEnabled: false,
           },
         },
       ],
