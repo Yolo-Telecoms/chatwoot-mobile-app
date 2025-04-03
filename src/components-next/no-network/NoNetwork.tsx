@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { SafeAreaView, StatusBar, Animated, Easing } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
-import i18n from 'i18n';
+import { useTranslation } from 'react-i18next';
 import { tailwind } from '@/theme';
 
 export const NoNetworkBar = () => {
+  const { t } = useTranslation();
+
   const animationConstants = useMemo(
     () => ({
       DURATION: 800,
@@ -18,7 +20,6 @@ export const NoNetworkBar = () => {
   const [connected, setConnected] = useState(true);
   const animation = useRef(new Animated.Value(0)).current;
 
-  // Took Reference from https://egghead.io/lessons/react-create-a-button-shake-animation-in-react-native#/tab-code
   const triggerAnimation = useCallback(() => {
     animation.setValue(0);
     Animated.timing(animation, {
@@ -46,6 +47,7 @@ export const NoNetworkBar = () => {
     inputRange: animationConstants.INPUT_RANGE,
     outputRange: animationConstants.OUTPUT_RANGE,
   });
+
   const animationStyle = {
     transform: [{ translateX: interpolated }],
   };
@@ -53,9 +55,9 @@ export const NoNetworkBar = () => {
   return !connected ? (
     <SafeAreaView style={tailwind.style('bg-red-900')}>
       <StatusBar backgroundColor={tailwind.color('red-900')} />
-      <Animated.View style={[tailwind.style(' px-4 py-2'), animationStyle]}>
+      <Animated.View style={[tailwind.style('px-4 py-2'), animationStyle]}>
         <Animated.Text style={[tailwind.style('text-white text-center text-sm'), animationStyle]}>
-          {i18n.t('ERRORS.OfFLINE')}
+          {t('ERRORS.OfFLINE')}
         </Animated.Text>
       </Animated.View>
     </SafeAreaView>
