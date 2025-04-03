@@ -1,7 +1,5 @@
 import moment from 'moment';
-import fromUnixTime from 'date-fns/fromUnixTime';
-import format from 'date-fns/format';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import { fromUnixTime, format, formatDistanceToNow } from 'date-fns';
 
 export const messageStamp = ({ time, dateFormat = 'h:mm a' }) => {
   const unixTime = fromUnixTime(time);

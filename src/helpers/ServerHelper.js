@@ -6,7 +6,7 @@ import I18n from '@/i18n';
 export const checkShouldShowServerUpgradeWarning = ({ installedVersion, minimumVersion }) => {
   try {
     return semver.lt(installedVersion, minimumVersion);
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 };
