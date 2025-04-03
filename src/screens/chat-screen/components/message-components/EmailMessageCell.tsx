@@ -1,3 +1,5 @@
+// File: src/screens/chat-screen/components/message-components/EmailMessageCell.tsx
+
 import React from 'react';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Channel, Message } from '@/types';
@@ -10,6 +12,9 @@ import { Email } from './Email';
 import { tailwind } from '@/theme';
 import { Avatar } from '@/components-next';
 
+// Use ES import for the local image
+import botAvatar from '../../../../assets/local/bot-avatar.png';
+
 export type EmailMessageCellProps = {
   item: Message;
   channel?: Channel;
@@ -17,7 +22,7 @@ export type EmailMessageCellProps = {
 };
 
 export const EmailMessageCell = (props: EmailMessageCellProps) => {
-  const messageItem = props.item as Message;
+  const { item: messageItem, channel, menuOptions } = props;
 
   const {
     messageType,
@@ -30,15 +35,14 @@ export const EmailMessageCell = (props: EmailMessageCellProps) => {
     createdAt,
     contentAttributes,
   } = messageItem;
-  const { channel } = props;
+
   const isIncoming = messageItem.messageType === MESSAGE_TYPES.INCOMING;
   const isOutgoing = messageItem.messageType === MESSAGE_TYPES.OUTGOING;
   const isActivity = messageItem.messageType === MESSAGE_TYPES.ACTIVITY;
   const isTemplate = messageItem.messageType === MESSAGE_TYPES.TEMPLATE;
   const errorMessage = contentAttributes?.externalError || '';
 
-  const { menuOptions } = props;
-
+  // Gather email content from contentAttributes
   const emailMessageContent = () => {
     const {
       htmlContent: { full: fullHTMLContent } = { full: undefined },
@@ -48,11 +52,9 @@ export const EmailMessageCell = (props: EmailMessageCellProps) => {
     if (fullHTMLContent) {
       return fullHTMLContent;
     }
-
     if (fullTextContent) {
       return fullTextContent.replace(/\n/g, '<br>');
     }
-
     return '';
   };
 
@@ -72,23 +74,24 @@ export const EmailMessageCell = (props: EmailMessageCellProps) => {
         {sender?.name && isIncoming && shouldRenderAvatar ? (
           <Animated.View style={tailwind.style('flex items-end justify-end mr-1')}>
             <Avatar
-              size={'md'}
+              size="md"
               src={sender?.thumbnail ? { uri: sender.thumbnail } : undefined}
               name={sender?.name || ''}
             />
           </Animated.View>
         ) : null}
+
         <MessageMenu menuOptions={menuOptions}>
-          <React.Fragment>
+          <>
             {isPrivate ? (
-              <React.Fragment>
-                <PrivateTextCell text={content} timeStamp={createdAt} />
-              </React.Fragment>
+              <PrivateTextCell text={content} timeStamp={createdAt} />
             ) : (
-              <React.Fragment>
-                {isIncoming || isOutgoing ? (
+              <>
+                {(isIncoming || isOutgoing) && (
                   <Email
-                    {...{ isActivity, isIncoming, isOutgoing }}
+                    isActivity={isActivity}
+                    isIncoming={isIncoming}
+                    isOutgoing={isOutgoing}
                     text={emailMessageContent()}
                     timeStamp={createdAt}
                     status={status}
@@ -101,8 +104,8 @@ export const EmailMessageCell = (props: EmailMessageCellProps) => {
                     sender={sender}
                     contentAttributes={contentAttributes}
                   />
-                ) : null}
-                {isTemplate ? (
+                )}
+                {isTemplate && (
                   <BotTextCell
                     text={content}
                     timeStamp={createdAt}
@@ -114,25 +117,27 @@ export const EmailMessageCell = (props: EmailMessageCellProps) => {
                     isPrivate={isPrivate}
                     errorMessage={errorMessage}
                   />
-                ) : null}
-                {isActivity ? <ActivityTextCell text={content} timeStamp={createdAt} /> : null}
-              </React.Fragment>
+                )}
+                {isActivity && <ActivityTextCell text={content} timeStamp={createdAt} />}
+              </>
             )}
-          </React.Fragment>
+          </>
         </MessageMenu>
-        {shouldRenderAvatar && (isPrivate || isOutgoing || isTemplate) ? (
+
+        {shouldRenderAvatar && (isPrivate || isOutgoing || isTemplate) && (
           <Animated.View style={tailwind.style('flex items-end justify-end ml-1')}>
             <Avatar
-              size={'md'}
+              size="md"
               src={
                 isTemplate
-                  ? require('../../../../assets/local/bot-avatar.png')
+                  ? // Use the ES import for the local PNG
+                    botAvatar
                   : { uri: sender?.thumbnail }
               }
               name={sender?.name || ''}
             />
           </Animated.View>
-        ) : null}
+        )}
       </Animated.View>
     </Animated.View>
   );
