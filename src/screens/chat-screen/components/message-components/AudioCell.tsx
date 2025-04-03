@@ -1,3 +1,5 @@
+// File: src/screens/chat-screen/components/message-components/AudioCell.tsx
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { PlayBackType } from 'react-native-audio-recorder-player';
@@ -14,29 +16,32 @@ import { Channel, IconProps, Message, MessageStatus, UnixTimestamp } from '@/typ
 import { unixTimestampToReadableTime } from '@/utils';
 import { Avatar, Icon, Slider } from '@/components-next/common';
 import { Spinner } from '@/components-next/spinner';
-import { pausePlayer, resumePlayer, seekTo, startPlayer, stopPlayer } from '../audio-recorder';
+import {
+  AudioStatus,
+  pausePlayer,
+  resumePlayer,
+  seekTo,
+  startPlayer,
+  stopPlayer,
+} from '../audio-recorder';
 import { MenuOption, MessageMenu } from '../message-menu';
 import { MESSAGE_TYPES } from '@/constants';
 import { DeliveryStatus } from './DeliveryStatus';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/hooks';
 
-export const PlayIcon = ({ fill, fillOpacity }: IconProps) => {
-  return (
-    <Svg width="10" height="13" viewBox="0 0 10 13" fill="none">
-      <Path d="M0 13V0L10 6.80952L0 13Z" fill={fill} fillOpacity={fillOpacity} />
-    </Svg>
-  );
-};
+export const PlayIcon = ({ fill, fillOpacity }: IconProps) => (
+  <Svg width="10" height="13" viewBox="0 0 10 13" fill="none">
+    <Path d="M0 13V0L10 6.80952L0 13Z" fill={fill} fillOpacity={fillOpacity} />
+  </Svg>
+);
 
-export const PauseIcon = ({ fill, fillOpacity }: IconProps) => {
-  return (
-    <Svg width="10" height="12" viewBox="0 0 10 12" fill="none">
-      <Rect width="3" height="12" fill={fill} fillOpacity={fillOpacity} />
-      <Rect x="7" width="3" height="12" fill={fill} fillOpacity={fillOpacity} />
-    </Svg>
-  );
-};
+export const PauseIcon = ({ fill, fillOpacity }: IconProps) => (
+  <Svg width="10" height="12" viewBox="0 0 10 12" fill="none">
+    <Rect width="3" height="12" fill={fill} fillOpacity={fillOpacity} />
+    <Rect x="7" width="3" height="12" fill={fill} fillOpacity={fillOpacity} />
+  </Svg>
+);
 
 type AudioCellProps = {
   audioSrc: string;
@@ -52,14 +57,13 @@ type AudioCellProps = {
   errorMessage?: string;
 };
 
-type AudioPlayerProps = Pick<AudioCellProps, 'audioSrc'> & {
+type AudioPlayerProps = {
+  audioSrc: string;
   isIncoming: boolean;
   isOutgoing: boolean;
 };
 
-export const AudioPlayer = (props: AudioPlayerProps) => {
-  const { audioSrc, isIncoming } = props;
-
+export const AudioPlayer = ({ audioSrc, isIncoming, isOutgoing }: AudioPlayerProps) => {
   const [isSoundLoading, setIsSoundLoading] = useState(false);
   const [isAudioPlaying, setAudioPlaying] = useState(false);
 
@@ -69,24 +73,22 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
   const currentPosition = useSharedValue(0);
   const totalDuration = useSharedValue(0);
 
-  const audioPlayBackStatus = (data: any) => {
-    const playBackData = data.data as PlayBackType;
-    if (playBackData) {
-      currentPosition.value = playBackData.currentPosition;
-      totalDuration.value = playBackData.duration;
-      if (playBackData.currentPosition === playBackData.duration) {
-        currentPosition.value = 0;
-        totalDuration.value = 0;
-        setAudioPlaying(false);
-        dispatch(setCurrentPlayingAudioSrc(''));
-      }
+  const audioPlayBackStatus = (event: { status: AudioStatus; data?: PlayBackType }) => {
+    if (!event.data) return;
+    currentPosition.value = event.data.currentPosition;
+    totalDuration.value = event.data.duration;
+
+    if (event.data.currentPosition === event.data.duration) {
+      currentPosition.value = 0;
+      totalDuration.value = 0;
+      setAudioPlaying(false);
+      dispatch(setCurrentPlayingAudioSrc(''));
     }
   };
 
   const togglePlayback = () => {
+    // If the same audio is currently playing
     if (audioSrc === currentPlayingAudioSrc) {
-      // The current playing audio file is same as the component audio src so
-      // we will have to just toggle the audio playing
       if (isAudioPlaying) {
         pausePlayer();
       } else {
@@ -94,8 +96,8 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
       }
       setAudioPlaying(!isAudioPlaying);
     } else {
+      // If a different audio is playing
       setIsSoundLoading(true);
-
       startPlayer(audioSrc, audioPlayBackStatus).then(() => {
         setIsSoundLoading(false);
         setAudioPlaying(true);
@@ -120,6 +122,7 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
   );
 
   useEffect(() => {
+    // If a different audio source is playing, reset our local position
     if (currentPlayingAudioSrc !== audioSrc) {
       currentPosition.value = 0;
       totalDuration.value = 0;
@@ -128,9 +131,10 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
   }, [currentPlayingAudioSrc]);
 
   useEffect(() => {
+    // Cleanup on unmount: stop the player
     return () => {
       stopPlayer()
-        .then()
+        .then(() => null)
         .finally(() => {
           setAudioPlaying(false);
           dispatch(setCurrentPlayingAudioSrc(''));
@@ -140,17 +144,14 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
   }, []);
 
   return (
-    <View style={tailwind.style('flex flex-row items-center flex-1')}>
+    <View style={tailwind`flex flex-row items-center flex-1`}>
       <Pressable disabled={isSoundLoading} hitSlop={10} onPress={togglePlayback}>
         {isSoundLoading ? (
           <Animated.View>
             <Spinner size={13} />
           </Animated.View>
         ) : isCurrentAudioSrcPlaying ? (
-          <Animated.View
-            style={tailwind.style('pl-0.5 pr-0.5')}
-            entering={FadeIn}
-            exiting={FadeOut}>
+          <Animated.View style={tailwind`pl-0.5 pr-0.5`} entering={FadeIn} exiting={FadeOut}>
             <Icon
               icon={
                 <PauseIcon
@@ -162,10 +163,7 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
             />
           </Animated.View>
         ) : (
-          <Animated.View
-            style={tailwind.style('pl-0.5 pr-0.5')}
-            entering={FadeIn}
-            exiting={FadeOut}>
+          <Animated.View style={tailwind`pl-0.5 pr-0.5`} entering={FadeIn} exiting={FadeOut}>
             <PlayIcon
               fillOpacity={isIncoming ? '1' : '0.565'}
               fill={isIncoming ? 'white' : 'black'}
@@ -177,7 +175,10 @@ export const AudioPlayer = (props: AudioPlayerProps) => {
         trackColor={isIncoming ? 'bg-whiteA-A9' : 'bg-gray-500'}
         filledTrackColor={isIncoming ? 'bg-white' : 'bg-blue-700'}
         knobStyle={isIncoming ? 'border-blue-300' : 'border-blue-700'}
-        {...{ manualSeekTo, currentPosition, totalDuration, pauseAudio }}
+        manualSeekTo={manualSeekTo}
+        currentPosition={currentPosition}
+        totalDuration={totalDuration}
+        pauseAudio={pauseAudio}
       />
     </View>
   );
@@ -211,33 +212,36 @@ export const AudioCell: React.FC<AudioCellProps> = props => {
         !shouldRenderAvatar && isOutgoing ? 'pr-7' : '',
         shouldRenderAvatar ? 'pb-2' : '',
       )}>
-      <Animated.View style={tailwind.style('flex flex-row')}>
+      <Animated.View style={tailwind`flex flex-row`}>
         {sender?.name && isIncoming && shouldRenderAvatar ? (
-          <Animated.View style={tailwind.style('flex items-end justify-end mr-1')}>
-            <Avatar size={'md'} src={{ uri: sender?.thumbnail }} name={sender?.name} />
+          <Animated.View style={tailwind`flex items-end justify-end mr-1`}>
+            <Avatar
+              size="md"
+              // Convert `null` → `undefined` in case thumbnail is null
+              src={sender?.thumbnail ? { uri: sender.thumbnail ?? undefined } : undefined}
+              name={sender?.name || ''}
+            />
           </Animated.View>
         ) : null}
+
         <MessageMenu menuOptions={menuOptions}>
           <Animated.View
-            style={[
-              tailwind.style(
-                'relative flex flex-row items-center w-[300px] pl-3 pr-2.5 py-2 rounded-2xl overflow-hidden',
-                isIncoming ? 'bg-blue-700' : '',
-                isOutgoing ? 'bg-gray-100' : '',
-                shouldRenderAvatar
-                  ? isOutgoing
-                    ? 'rounded-br-none'
-                    : isIncoming
-                      ? 'rounded-bl-none'
-                      : ''
-                  : '',
-              ),
-            ]}>
-            <AudioPlayer {...{ audioSrc, isIncoming, isOutgoing }} />
+            style={tailwind.style(
+              'relative flex flex-row items-center w-[300px] pl-3 pr-2.5 py-2 rounded-2xl overflow-hidden',
+              isIncoming ? 'bg-blue-700' : '',
+              isOutgoing ? 'bg-gray-100' : '',
+              shouldRenderAvatar
+                ? isOutgoing
+                  ? 'rounded-br-none'
+                  : isIncoming
+                    ? 'rounded-bl-none'
+                    : ''
+                : '',
+            )}>
+            <AudioPlayer audioSrc={audioSrc} isIncoming={isIncoming} isOutgoing={isOutgoing} />
+
             <Animated.View
-              style={tailwind.style(
-                'h-[21px] pt-[5px] pb-0.5 flex flex-row items-center self-end pl-1.5',
-              )}>
+              style={tailwind`h-[21px] pt-[5px] pb-0.5 flex flex-row items-center self-end pl-1.5`}>
               <Text
                 style={tailwind.style(
                   'text-xs font-inter-420-20 tracking-[0.32px] leading-[14px] pr-1',
@@ -259,9 +263,15 @@ export const AudioCell: React.FC<AudioCellProps> = props => {
             </Animated.View>
           </Animated.View>
         </MessageMenu>
+
         {sender?.name && isOutgoing && shouldRenderAvatar ? (
-          <Animated.View style={tailwind.style('flex items-end justify-end ml-1')}>
-            <Avatar size={'md'} src={{ uri: sender?.thumbnail }} name={sender?.name} />
+          <Animated.View style={tailwind`flex items-end justify-end ml-1`}>
+            <Avatar
+              size="md"
+              // Convert `null` → `undefined`
+              src={sender?.thumbnail ? { uri: sender.thumbnail ?? undefined } : undefined}
+              name={sender?.name || ''}
+            />
           </Animated.View>
         ) : null}
       </Animated.View>
