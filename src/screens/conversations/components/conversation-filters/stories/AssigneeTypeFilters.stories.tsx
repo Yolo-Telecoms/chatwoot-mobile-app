@@ -7,8 +7,8 @@ import {
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetScrollView,
+  useBottomSheetSpringConfigs,
 } from '@gorhom/bottom-sheet';
-import { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 
 import { AssigneeTypeFilters } from '../AssigneeTypeFilters';
 import { defaultFilterState } from '@/store/conversation/conversationFilterSlice';

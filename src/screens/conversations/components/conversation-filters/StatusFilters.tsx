@@ -7,12 +7,11 @@ import { useRefsContext } from '@/context';
 import { selectFilters, setFilters } from '@/store/conversation/conversationFilterSlice';
 import { TickIcon } from '@/svg-icons';
 import { tailwind } from '@/theme';
-import { StatusCollection } from '@/types';
+import { StatusCollection, StatusOptions } from '@/types';
 import { getStatusTypeIcon, useHaptic } from '@/utils';
 import { BottomSheetHeader, Icon } from '@/components-next';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import i18n from '@/i18n';
-import { StatusOptions } from '@/types';
 
 type StatusCellProps = {
   value: StatusCollection;

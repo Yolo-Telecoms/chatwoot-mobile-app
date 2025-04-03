@@ -5,8 +5,8 @@ import {
   BottomSheetModal,
   BottomSheetScrollView,
   BottomSheetModalProvider,
+  useBottomSheetSpringConfigs,
 } from '@gorhom/bottom-sheet';
-import { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 
 import { BottomSheetHeader } from './BottomSheetHeader';
 import { BottomSheetBackdrop } from './BottomSheetBackdrop';

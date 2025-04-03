@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks';
 import { useChatWindowContext } from '@/context';
-import { Platform } from 'react-native';
+import { Platform, Animated } from 'react-native';
 import { KeyboardGestureArea } from 'react-native-keyboard-controller';
 import { flatMap } from 'lodash';
 import useDeepCompareEffect from 'use-deep-compare-effect';
@@ -13,7 +13,6 @@ import {
 } from '@/store/conversation/conversationSelectors';
 import { conversationActions } from '@/store/conversation/conversationActions';
 import { selectAttachments } from '@/store/conversation/sendMessageSlice';
-import { Animated } from 'react-native';
 import { getGroupedMessages, isAnEmailChannel } from '@/utils';
 import { MessagesList } from './MessagesList';
 import tailwind from 'twrnc';

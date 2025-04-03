@@ -14,20 +14,22 @@ import {
   selectUserId,
   selectCurrentUserAccountId,
 } from '@/store/auth/authSelectors';
-import { selectWebSocketUrl } from '@/store/settings/settingsSelectors';
+import {
+  selectWebSocketUrl,
+  selectInstallationUrl,
+  selectChatwootVersion,
+} from '@/store/settings/settingsSelectors';
 
-import { getUserPermissions } from 'helpers/permissionHelper';
-import { CONVERSATION_PERMISSIONS } from 'constants/permissions';
+import { getUserPermissions } from '@/helpers/permissionHelper';
+import { CONVERSATION_PERMISSIONS } from '@/constants/permissions';
 
 import { AuthStack, ConversationStack, SettingsStack, InboxStack } from '../stack';
 import ChatScreen from '@/screens/chat-screen/ChatScreen';
 import ContactDetailsScreen from '@/screens/contact-details/ContactDetailsScreen';
 import DashboardScreen from '@/screens/dashboard/DashboardScreen';
 
-import { selectInstallationUrl } from '@/store/settings/settingsSelectors';
 import { BottomTabBar } from './BottomTabBar';
 import { settingsActions } from '@/store/settings/settingsActions';
-import { selectChatwootVersion } from '@/store/settings/settingsSelectors';
 import { checkServerSupport } from '@/helpers/ServerHelper';
 import { inboxActions } from '@/store/inbox/inboxActions';
 import { labelActions } from '@/store/label/labelActions';

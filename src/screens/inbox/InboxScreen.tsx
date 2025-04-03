@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 
 import { TAB_BAR_HEIGHT } from '@/constants';
-import { InboxListStateProvider } from '@/context';
+import { InboxListStateProvider, useInboxListStateContext } from '@/context';
 import type { Notification } from '@/types/Notification';
 import { tailwind } from '@/theme';
 import { useAppDispatch, useAppSelector } from '@/hooks';
@@ -20,7 +20,6 @@ import {
   selectIsLoadingNotifications,
 } from '@/store/notification/notificationSelectors';
 import { InboxHeader, InboxItemContainer } from './components';
-import { useInboxListStateContext } from '@/context';
 import { resetNotifications } from '@/store/notification/notificationSlice';
 import { showToast } from '@/helpers/ToastHelper';
 import i18n from '@/i18n';

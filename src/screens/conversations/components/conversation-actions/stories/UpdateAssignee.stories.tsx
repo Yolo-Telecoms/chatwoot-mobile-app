@@ -7,8 +7,8 @@ import {
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetScrollView,
+  useBottomSheetSpringConfigs,
 } from '@gorhom/bottom-sheet';
-import { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 
 import { UpdateAssignee } from '../UpdateAssignee';
 import { BottomSheetBackdrop } from '@/components-next/common/bottomsheet/BottomSheetBackdrop';

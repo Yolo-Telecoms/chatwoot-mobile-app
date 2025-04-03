@@ -24,9 +24,8 @@ import { isContactTyping, getLastMessage, getTypingUsersText } from '@/utils';
 import { Icon, Swipeable } from '@/components-next/common';
 
 import { ConversationItem } from './ConversationItem';
-import { MarkAsUnRead, StatusIcon } from '@/svg-icons';
+import { MarkAsUnRead, StatusIcon, MarkAsRead } from '@/svg-icons';
 import { tailwind } from '@/theme';
-import { MarkAsRead } from '@/svg-icons';
 import i18n from '@/i18n';
 
 type ConversationItemContainerProps = {

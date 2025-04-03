@@ -11,14 +11,16 @@ import { SelfAssign, TickIcon } from '@/svg-icons';
 
 import { assignableAgentActions } from '@/store/assignable-agent/assignableAgentActions';
 import { useAppDispatch, useAppSelector } from '@/hooks';
-import { selectAssignableAgentsByInboxId } from '@/store/assignable-agent/assignableAgentSelectors';
+import {
+  selectAssignableAgentsByInboxId,
+  isAssignableAgentFetching,
+} from '@/store/assignable-agent/assignableAgentSelectors';
 import {
   selectSelectedIds,
   selectSelectedInboxes,
   selectSelectedConversation,
 } from '@/store/conversation/conversationSelectedSlice';
 import { conversationActions } from '@/store/conversation/conversationActions';
-import { isAssignableAgentFetching } from '@/store/assignable-agent/assignableAgentSelectors';
 import { showToast } from '@/helpers/ToastHelper';
 import i18n from '@/i18n';
 import { CONVERSATION_EVENTS } from '@/constants/analyticsEvents';

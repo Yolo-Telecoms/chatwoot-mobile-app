@@ -11,11 +11,10 @@ import {
   FileCell,
   ImageCell,
   VideoCell,
+  TextMessageCell,
 } from '../message-components';
-import { TextMessageCell } from '../message-components';
-import { ATTACHMENT_TYPES } from '@/constants';
+import { ATTACHMENT_TYPES, CONTENT_TYPES } from '@/constants';
 import { LocationCell } from '../message-components/LocationCell';
-import { CONTENT_TYPES } from '@/constants';
 
 type DateSectionProps = { item: { date: string } };
 

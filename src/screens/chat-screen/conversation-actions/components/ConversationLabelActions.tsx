@@ -8,9 +8,8 @@ import { LabelTag } from '@/svg-icons';
 import { tailwind } from '@/theme';
 import { Label } from '@/types';
 import { BottomSheetBackdrop, Icon, SearchBar } from '@/components-next';
-import { useAppSelector } from '@/hooks';
+import { useAppSelector, useAppDispatch } from '@/hooks';
 import { filterLabels } from '@/store/label/labelSelectors';
-import { useAppDispatch } from '@/hooks';
 import { conversationActions } from '@/store/conversation/conversationActions';
 
 import { LabelCell, LabelItem } from '@/components-next/label-section';

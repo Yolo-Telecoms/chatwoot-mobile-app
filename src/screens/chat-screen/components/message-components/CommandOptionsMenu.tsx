@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Linking, Platform, Pressable, Text } from 'react-native';
-import { Asset, launchCamera, launchImageLibrary,  } from 'react-native-image-picker';
+import { Asset, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

@@ -1,5 +1,4 @@
-import { Conversation } from '@/types';
-import { Contact } from '@/types';
+import { Conversation, Contact } from '@/types';
 
 import {
   getMessageVariables,

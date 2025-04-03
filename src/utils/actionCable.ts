@@ -17,9 +17,8 @@ import {
   transformNotificationCreatedResponse,
   transformNotificationRemovedResponse,
 } from './camelCaseKeys';
-import { addNotification } from '@/store/notification/notificationSlice';
+import { addNotification, removeNotification } from '@/store/notification/notificationSlice';
 import { setCurrentUserAvailability } from '@/store/auth/authSlice';
-import { removeNotification } from '@/store/notification/notificationSlice';
 import {
   NotificationCreatedResponse,
   NotificationRemovedResponse,

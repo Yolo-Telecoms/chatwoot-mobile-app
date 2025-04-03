@@ -16,7 +16,7 @@ import * as WebBrowser from 'expo-web-browser';
 import ChatWootWidget from '@chatwoot/react-native-widget';
 import { useSelector } from 'react-redux';
 import * as Application from 'expo-application';
-import { Account, AvailabilityStatus } from '@/types';
+import { Account, AvailabilityStatus, GenericListType } from '@/types';
 import { clearAllConversations } from '@/store/conversation/conversationSlice';
 import { clearAllContacts } from '@/store/contact/contactSlice';
 
@@ -40,7 +40,6 @@ import { UserAvatar } from './components/UserAvatar';
 import { LANGUAGES, TAB_BAR_HEIGHT } from '@/constants';
 import { useRefsContext } from '@/context';
 import { ChatwootIcon, NotificationIcon, SwitchIcon, TranslateIcon } from '@/svg-icons';
-import { GenericListType } from '@/types';
 
 import { useHaptic } from '@/utils';
 import { SettingsHeader } from './SettingsHeader';

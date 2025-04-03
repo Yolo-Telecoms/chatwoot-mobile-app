@@ -15,13 +15,12 @@ import {
 import { TAB_BAR_HEIGHT } from '@/constants';
 import { tailwind } from '@/theme';
 import { ConversationStatus } from '@/types';
-import { useChatWindowContext } from '@/context';
+import { useChatWindowContext, useRefsContext } from '@/context';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { selectConversationById } from '@/store/conversation/conversationSelectors';
 import { conversationActions } from '@/store/conversation/conversationActions';
 
 import { setActionState } from '@/store/conversation/conversationActionSlice';
-import { useRefsContext } from '@/context';
 import { selectSingleConversation } from '@/store/conversation/conversationSelectedSlice';
 import { teamActions } from '@/store/team/teamActions';
 import { selectAllTeams } from '@/store/team/teamSelectors';

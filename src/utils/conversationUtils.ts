@@ -1,5 +1,4 @@
-import type { Conversation } from '@/types';
-import type { Message } from '@/types';
+import type { Conversation, Message } from '@/types';
 import { groupBy } from 'lodash';
 
 import type { FilterState } from '@/store/conversation/conversationFilterSlice';

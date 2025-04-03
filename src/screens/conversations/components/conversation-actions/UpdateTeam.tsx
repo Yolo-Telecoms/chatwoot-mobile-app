@@ -12,12 +12,11 @@ import { TickIcon } from '@/svg-icons';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { selectSelectedConversation } from '@/store/conversation/conversationSelectedSlice';
 import { conversationActions } from '@/store/conversation/conversationActions';
-import { selectLoading } from '@/store/team/teamSelectors';
+import { selectLoading, filterTeams } from '@/store/team/teamSelectors';
 import { showToast } from '@/helpers/ToastHelper';
 import i18n from '@/i18n';
 import { CONVERSATION_EVENTS } from '@/constants/analyticsEvents';
 import AnalyticsHelper from '@/helpers/AnalyticsHelper';
-import { filterTeams } from '@/store/team/teamSelectors';
 
 type TeamCellProps = {
   value: Team;

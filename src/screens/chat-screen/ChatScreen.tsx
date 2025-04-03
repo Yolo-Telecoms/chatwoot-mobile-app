@@ -6,11 +6,9 @@ import TrackPlayer from 'react-native-track-player';
 import { LightBoxProvider } from '@alantoa/lightbox';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { ChatHeaderContainer } from './components';
+import { ChatHeaderContainer, ReplyBoxContainer, MessagesListContainer } from './components';
 import { ConversationActions } from './conversation-actions';
 
-import { ReplyBoxContainer } from './components';
-import { MessagesListContainer } from './components';
 import { ChatWindowProvider, useChatWindowContext, useRefsContext } from '@/context';
 import { TabBarExcludedScreenParamList } from '@/navigation/tabs/AppTabs';
 import { tailwind } from '@/theme';

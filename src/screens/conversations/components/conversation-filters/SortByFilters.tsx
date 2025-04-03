@@ -5,12 +5,11 @@ import Animated from 'react-native-reanimated';
 import { useRefsContext } from '@/context';
 import { TickIcon } from '@/svg-icons';
 import { tailwind } from '@/theme';
-import { SortTypes } from '@/types';
+import { SortTypes, SortOptions } from '@/types';
 import { useHaptic } from '@/utils';
 import { BottomSheetHeader, Icon } from '@/components-next';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import i18n from '@/i18n';
-import { SortOptions } from '@/types';
 import { selectFilters, setFilters } from '@/store/conversation/conversationFilterSlice';
 
 type SortByCellProps = {

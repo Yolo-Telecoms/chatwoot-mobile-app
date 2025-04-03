@@ -1,7 +1,6 @@
 /* eslint-disable react/display-name */
 import React from 'react';
-import { SharedValue } from 'react-native-reanimated';
-import Animated from 'react-native-reanimated';
+import Animated, { SharedValue } from 'react-native-reanimated';
 
 import { notificationActions } from '@/store/notification/notificationAction';
 import { useAppDispatch, useAppSelector } from '@/hooks';
@@ -9,8 +8,7 @@ import type { Notification } from '@/types/Notification';
 import type { MarkAsReadPayload } from '@/store/notification/notificationTypes';
 import { MarkAsRead, MarkAsUnRead, DeleteIcon } from '@/svg-icons';
 import { InboxItem } from './InboxItem';
-import { formatRelativeTime } from '@/utils/dateTimeUtils';
-import { formatTimeToShortForm } from '@/utils/dateTimeUtils';
+import { formatRelativeTime, formatTimeToShortForm } from '@/utils/dateTimeUtils';
 import { tailwind } from '@/theme';
 import { Icon, Swipeable } from '@/components-next';
 import { selectInboxById } from '@/store/inbox/inboxSelectors';

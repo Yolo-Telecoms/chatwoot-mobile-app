@@ -2,11 +2,11 @@ import axios from 'axios';
 import * as Sentry from '@sentry/react-native';
 
 import { API_URL } from '../constants/url';
-import I18n from '../i18n'; 
+import I18n from '../i18n';
 
 import { showToast } from './ToastHelper';
 import { getHeaders, getBaseUrl } from '../services/auth';
-import { handleLogout } from '../reducer/authHelper'; 
+import { handleLogout } from '../reducer/authHelper';
 import { getStore } from '@/store/storeAccessor';
 
 const parseErrorCode = error => {

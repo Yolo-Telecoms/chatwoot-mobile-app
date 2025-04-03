@@ -11,9 +11,11 @@ import { TickIcon } from '@/svg-icons';
 
 import { assignableAgentActions } from '@/store/assignable-agent/assignableAgentActions';
 import { useAppDispatch, useAppSelector } from '@/hooks';
-import { selectAssignableParticipantsByInboxId } from '@/store/assignable-agent/assignableAgentSelectors';
+import {
+  selectAssignableParticipantsByInboxId,
+  isAssignableAgentFetching,
+} from '@/store/assignable-agent/assignableAgentSelectors';
 import { selectSelectedConversation } from '@/store/conversation/conversationSelectedSlice';
-import { isAssignableAgentFetching } from '@/store/assignable-agent/assignableAgentSelectors';
 import { showToast } from '@/helpers/ToastHelper';
 import i18n from '@/i18n';
 import { CONVERSATION_EVENTS } from '@/constants/analyticsEvents';

@@ -22,6 +22,7 @@ import {
   isATelegramChannel,
   isAWebWidgetInbox,
   isAPIInbox,
+  getTypingUsersText,
 } from '@/utils';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { MESSAGE_MAX_LENGTH, REPLY_EDITOR_MODES } from '@/constants';
@@ -36,7 +37,10 @@ import {
   setMessageContent,
 } from '@/store/conversation/sendMessageSlice';
 import { selectUserId, selectUserName, selectUserThumbnail } from '@/store/auth/authSelectors';
-import { selectConversationById } from '@/store/conversation/conversationSelectors';
+import {
+  selectConversationById,
+  getLastEmailInSelectedChat,
+} from '@/store/conversation/conversationSelectors';
 import { selectInboxById } from '@/store/inbox/inboxSelectors';
 import { conversationActions } from '@/store/conversation/conversationActions';
 
@@ -50,7 +54,6 @@ import { AttachedMedia } from '../message-components/AttachedMedia';
 import { CommandOptionsMenu } from '../message-components/CommandOptionsMenu';
 import { SendMessagePayload } from '@/store/conversation/conversationTypes';
 import { TypingIndicator } from './TypingIndicator';
-import { getTypingUsersText } from '@/utils';
 import { selectTypingUsersByConversationId } from '@/store/conversation/conversationTypingSlice';
 import { Agent, CannedResponse, Conversation } from '@/types';
 import AnalyticsHelper from '@/helpers/AnalyticsHelper';
@@ -61,7 +64,6 @@ import {
   getAllUndefinedVariablesInMessage,
 } from '@/utils/messageVariableUtils';
 import { ReplyEmailHead } from './ReplyEmailHead';
-import { getLastEmailInSelectedChat } from '@/store/conversation/conversationSelectors';
 import { selectAssignableParticipantsByInboxId } from '@/store/assignable-agent/assignableAgentSelectors';
 
 const SHEET_APPEAR_SPRING_CONFIG = {

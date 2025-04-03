@@ -5,7 +5,7 @@ import { BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { useRefsContext } from '@/context';
 import { tailwind } from '@/theme';
-import { ConversationStatus, StatusCollection } from '@/types';
+import { ConversationStatus, StatusCollection, StatusOptions } from '@/types';
 import { getStatusTypeIcon, useHaptic } from '@/utils';
 import { BottomSheetHeader, Icon } from '@/components-next';
 import { useAppDispatch, useAppSelector } from '@/hooks';
@@ -16,7 +16,6 @@ import {
 import { conversationActions } from '@/store/conversation/conversationActions';
 import { setCurrentState } from '@/store/conversation/conversationHeaderSlice';
 import i18n from '@/i18n';
-import { StatusOptions } from '@/types';
 type StatusCellProps = {
   value: StatusCollection;
   isLastItem: boolean;
