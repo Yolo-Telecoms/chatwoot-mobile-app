@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import {
@@ -11,17 +11,20 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { AppTabs } from './tabs/AppTabs';
-import i18n from 'i18n';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useTranslation } from 'react-i18next';
+
+import notifee from '@notifee/react-native';
+
+import { AppTabs } from './tabs/AppTabs';
 import { navigationRef } from '../helpers/NavigationHelper';
 import { findConversationLinkFromPush, findNotificationFromFCM } from '../helpers/PushHelper';
 import { extractConversationIdFromUrl } from '../helpers/conversationHelpers';
 import { useAppSelector } from '@/hooks';
 import { selectInstallationUrl, selectLocale } from '@/store/settings/settingsSelectors';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RefsProvider } from '@/context';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import Inter400 from '../assets/fonts/Inter-400-20.ttf';
 import Inter420 from '../assets/fonts/Inter-420-20.ttf';
@@ -58,23 +61,19 @@ const customGetStateFromPath: LinkingOptions<RootParamList>['getStateFromPath'] 
   path,
   options,
 ) => {
-  // 2) Build a minimal config object to pass into getStateFromPathLib:
   const minimalConfig: MinimalOptions<RootParamList> = {
     initialRouteName: options?.initialRouteName,
     // If there's no `screens` in `options`, default to an empty object
     screens: options?.screens ?? {},
   };
 
-  // 3) Use that minimal subset to parse the path:
   const state = getStateFromPathLib(path, minimalConfig);
-
-  // 4) If no conversation ID in URL, let default parse stand:
   const conversationId = extractConversationIdFromUrl({ url: path });
+
   if (!conversationId) {
     return state;
   }
 
-  // 5) Otherwise, override the route to ChatScreen with additional params:
   const { routes } = state || {};
   let primaryActorId: number | undefined;
   let primaryActorType: string | undefined;
@@ -102,12 +101,37 @@ const customGetStateFromPath: LinkingOptions<RootParamList>['getStateFromPath'] 
   };
 };
 
-messaging().setBackgroundMessageHandler(async () => {
-  // ...
+/**
+ * 2) Set up the background handler for Firebase push messages:
+ *    Must be outside of your React component.
+ */
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('[BackgroundMessageHandler] remoteMessage:', remoteMessage);
+
+  // 1) Extract data from the message:
+  const { data, notification } = remoteMessage;
+
+  // 2) Perform background logic (store data, etc.)
+  if (data) {
+    console.log('[BackgroundMessageHandler] Data:', data);
+    // e.g., storeDataInSecureStore(data.conversationId, data.someOtherField);
+  }
+
+  // 3) Display a local notification. For instance, using Notifee:
+
+  if (notification) {
+    await notifee.requestPermission();
+    await notifee.displayNotification({
+      title: notification.title ?? 'New message',
+      body: notification.body ?? 'You have a new message',
+      android: {
+        channelId: 'default',
+      },
+    });
+  }
 });
 
 export const AppNavigationContainer = () => {
-  // If you don't use the second array item (error), just destructure fontsLoaded:
   const [fontsLoaded] = useFonts({
     Inter400,
     Inter420,
@@ -118,12 +142,23 @@ export const AppNavigationContainer = () => {
 
   const routeNameRef = useRef<string | undefined>();
 
+  /**
+   * Use react-i18next. This gives us the `i18n` instance,
+   * which we can call `changeLanguage(...)` on.
+   */
+  const { i18n } = useTranslation();
+
   const installationUrl = useAppSelector(selectInstallationUrl);
   const locale = useAppSelector(selectLocale);
-  i18n.setLocale(locale);
 
-  // 6) Define your main LinkingOptions. No type overrides needed
-  //    because `customGetStateFromPath` matches the official signature.
+  // Keep the app's language in sync with the Redux store
+  useEffect(() => {
+    if (locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [locale, i18n]);
+
+  // 6) Define your main LinkingOptions
   const linking: LinkingOptions<RootParamList> = {
     prefixes: [installationUrl],
     config: {
@@ -138,8 +173,6 @@ export const AppNavigationContainer = () => {
         },
       },
     },
-
-    // Use our strictly typed function
     getStateFromPath: customGetStateFromPath,
 
     async getInitialURL() {
@@ -166,7 +199,6 @@ export const AppNavigationContainer = () => {
 
     subscribe(listener: (url: string) => void) {
       const onReceiveURL = ({ url }: { url: string }) => listener(url);
-
       const { remove } = Linking.addEventListener('url', onReceiveURL);
 
       const unsubscribeNotification = messaging().onNotificationOpenedApp(msg => {
